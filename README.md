@@ -10,13 +10,13 @@ Il gioco e' ambientato in luoghi oscuri dominati dai vampiri. Zephyr Ragnar deve
 
 Il protagonista parte dal livello 1 con la prima forma della SoulSword. Salendo di livello aumenta vita massima e danno, mentre la SoulSword cambia evoluzione:
 
-- **SoulSword I**: forma iniziale dell'eroe.
+- **SoulSword: Risvegliata**: forma iniziale dell'eroe.
 
-- **SoulSword II**: evoluzione raggiunta dal livello 10.
+- **SoulSword: Lama di Sangue**: evoluzione raggiunta dal livello 10.
 
-- **SoulSword III**: evoluzione raggiunta dal livello 20.
+- **SoulSword: Mietitrice dell'Alba**: evoluzione raggiunta dal livello 20.
 
-Il livello massimo dell'eroe e' 30. Ogni volta che Zephyr Ragnar sale di livello, la sua vita viene riportata al massimo.
+Il livello massimo dell'eroe e' 30. Ogni volta che Zephyr Ragnar sale di livello, la sua vita viene riportata al massimo e ottiene 1 punto statistica da assegnare a Forza o Salute.
 
 ## Come eseguire il progetto
 
@@ -62,7 +62,8 @@ gradlew.bat run
 ### Sistema di personaggio RPG con:
 
 - Livello di esperienza
-- Statistiche dell'eroe: vita e danno
+- Statistiche dell'eroe: Forza, che aumenta il danno, e Salute, che aumenta la vita massima
+- 1 punto statistica ottenuto a ogni level up e assegnabile dal menu di selezione scenario
 - Evoluzione della SoulSword in base al livello
 - Cambio automatico dello sprite dell'eroe quando la SoulSword evolve
 
