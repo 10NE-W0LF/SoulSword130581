@@ -1,9 +1,9 @@
 package it.unicam.cs.mpgc.rpg130581.modello.personaggi;
 
 public enum EvoluzioneSoulSword {
-    RISVEGLIATA(1, "SoulSword I"),
-    LAMA_DI_SANGUE(10, "SoulSword II"),
-    MIETITRICE_DELL_ALBA(20, "SoulSword III");
+    RISVEGLIATA(1, "SoulSword: Risvegliata"),
+    LAMA_DI_SANGUE(10, "SoulSword: Lama di Sangue"),
+    MIETITRICE_DELL_ALBA(20, "SoulSword: Mietitrice dell'Alba");
 
     private final int requiredLevel;
     private final String nomeVisualizzato;

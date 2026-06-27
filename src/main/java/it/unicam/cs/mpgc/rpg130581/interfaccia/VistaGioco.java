@@ -342,7 +342,7 @@ public class VistaGioco extends Canvas {
         grafica.setFill(Color.rgb(14, 17, 18, 0.82));
         grafica.fillRoundRect(14, 14, 610, 118, 8, 8);
         disegnaBarra(grafica, 28, 36, 190, eroe.getVita(), eroe.getVitaMassima(),
-                Color.rgb(85, 180, 95));
+                Color.rgb(190, 42, 52));
         disegnaBarra(grafica, 28, 66, 190, eroe.getEsperienza(),
                 eroe.esperienzaPerProssimoLivello(), Color.rgb(80, 130, 220));
 
@@ -354,11 +354,9 @@ public class VistaGioco extends Canvas {
         String livello = eroe.isLivelloMassimo() ? "Livello 30 MAX" : "Livello " + eroe.getLivello();
         grafica.fillText(eroe.getNome() + " - " + livello + " - "
                 + eroe.getEvoluzioneSoulSword().getNomeVisualizzato(), 236, 67);
-        grafica.fillText("Vampiri: " + eroe.getVampiriSconfitti()
-                + " | Area: " + motoreGioco.getStato().getSconfittiNelloScenario()
+        grafica.fillText("Nemici: " + motoreGioco.getStato().getSconfittiNelloScenario()
                 + "/" + motoreGioco.getScenarioCorrente().getNemiciRegolari(), 236, 91);
         grafica.fillText("WASD/Frecce: muovi | SHIFT: corsa | SPAZIO: attacca | ESC: pausa", 28, 108);
-        grafica.fillText(motoreGioco.getUltimoMessaggio(), 28, 124);
     }
 
     private void disegnaBarra(GraphicsContext grafica, double x, double y, double larghezza,

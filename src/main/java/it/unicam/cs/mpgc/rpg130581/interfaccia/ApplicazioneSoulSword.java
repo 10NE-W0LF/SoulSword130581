@@ -3,12 +3,12 @@ package it.unicam.cs.mpgc.rpg130581.interfaccia;
 import it.unicam.cs.mpgc.rpg130581.modello.partita.FaseGioco;
 import it.unicam.cs.mpgc.rpg130581.modello.partita.ScenarioGioco;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.Eroe;
+import it.unicam.cs.mpgc.rpg130581.modello.personaggi.EvoluzioneSoulSword;
 import it.unicam.cs.mpgc.rpg130581.motore.MotoreGioco;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -85,10 +85,15 @@ public class ApplicazioneSoulSword extends Application {
         immagineEroe.setSmooth(false);
 
         Text titolo = testo("Selezione scenario", 36, FontWeight.EXTRA_BOLD);
-        Text datiEroe = testo(eroe.getNome() + "\nLivello " + eroe.getLivello()
-                + "\n" + eroe.getEvoluzioneSoulSword().getNomeVisualizzato(), 18, FontWeight.BOLD);
+        Text nomeEroe = testo(eroe.getNome(), 18, FontWeight.BOLD);
+        Text livelloEroe = testo("Livello " + eroe.getLivello(), 18, FontWeight.BOLD);
+        Text soulSword = testo(eroe.getEvoluzioneSoulSword().getNomeVisualizzato(), 18, FontWeight.BOLD);
+        Color coloreEvoluzione = coloreSoulSword(eroe.getEvoluzioneSoulSword());
+        nomeEroe.setFill(Color.rgb(80, 170, 255));
+        livelloEroe.setFill(coloreEvoluzione);
+        soulSword.setFill(coloreEvoluzione);
 
-        VBox schedaEroe = new VBox(12, immagineEroe, datiEroe);
+        VBox schedaEroe = new VBox(12, immagineEroe, nomeEroe, livelloEroe, soulSword);
         schedaEroe.setAlignment(Pos.CENTER);
         schedaEroe.setPadding(new Insets(28));
         schedaEroe.setMinWidth(280);
@@ -98,16 +103,16 @@ public class ApplicazioneSoulSword extends Application {
         listaScenari.setAlignment(Pos.CENTER_LEFT);
         for (ScenarioGioco scenario : ScenarioGioco.values()) {
             Button bottoneScenario = bottone(scenario.getNumero() + "  " + scenario.getNomeVisualizzato()
-                    + "   | Vampiri: " + scenario.getNemiciRegolari()
+                    + "   | Nemici: " + scenario.getNemiciRegolari()
                     + (scenario.isScenarioBoss() ? "   | Boss" : ""));
             bottoneScenario.setMaxWidth(Double.MAX_VALUE);
             bottoneScenario.setOnAction(ignored -> mostraGioco(scenario));
             listaScenari.getChildren().add(bottoneScenario);
         }
 
-        Button tornaMenu = bottone("Torna al menu principale");
+        Button tornaMenu = bottone("Menu principale");
         tornaMenu.setOnAction(ignored -> mostraMenuPrincipale());
-        Button salva = bottone("Salva stato eroe");
+        Button salva = bottone("Salva");
         salva.setOnAction(ignored -> motoreGioco.salva());
 
         VBox destra = new VBox(16, titolo, listaScenari, salva, tornaMenu);
@@ -152,8 +157,8 @@ public class ApplicazioneSoulSword extends Application {
         titolo.setFill(Color.rgb(210, 238, 255));
         Text nota = testo("I progressi dello scenario vengono salvati solo in caso di vittoria.", 15, FontWeight.NORMAL);
 
-        Button gioca = bottone("Gioca");
-        Button selezioneScenario = bottone("Torna alla selezione scenario");
+        Button gioca = bottone("Continua");
+        Button selezioneScenario = bottone("Scenari");
 
         VBox pannello = pannelloMenu();
         pannello.getChildren().addAll(titolo, nota, gioca, selezioneScenario);
@@ -186,22 +191,18 @@ public class ApplicazioneSoulSword extends Application {
             motoreGioco.salva();
         }
 
-        Text titolo = testo(vittoria ? "VITTORIA" : "GAME OVER", 56, FontWeight.EXTRA_BOLD);
+        Text titolo = testo(vittoria ? "Vittoria" : "Sconfitta", 56, FontWeight.EXTRA_BOLD);
         titolo.setFill(vittoria ? Color.rgb(80, 220, 255) : Color.rgb(255, 70, 82));
         Text messaggio = testo(messaggioFinale, 18, FontWeight.NORMAL);
-        Text aiuto = testo(vittoria
-                ? "Scenario completato. La partita e' stata salvata."
-                : "Il livello e l'esperienza ottenuti in questo tentativo non vengono salvati.",
-                15, FontWeight.NORMAL);
 
-        Button restart = bottone("Restart scenario");
+        Button restart = bottone("Riprova");
         restart.setOnAction(ignored -> {
             if (!vittoria) {
                 motoreGioco.annullaScenarioSenzaProgressi();
             }
             mostraGioco(scenarioConcluso);
         });
-        Button selezioneScenario = bottone("Torna alla selezione scenario");
+        Button selezioneScenario = bottone("Scenari");
         selezioneScenario.setOnAction(ignored -> {
             if (vittoria) {
                 motoreGioco.confermaVittoriaScenario();
@@ -221,7 +222,11 @@ public class ApplicazioneSoulSword extends Application {
         });
 
         VBox pannello = pannelloMenu();
-        pannello.getChildren().addAll(titolo, messaggio, aiuto, restart, selezioneScenario, menuPrincipale);
+        pannello.getChildren().addAll(titolo, messaggio);
+        if (!vittoria) {
+            pannello.getChildren().add(restart);
+        }
+        pannello.getChildren().addAll(selezioneScenario, menuPrincipale);
         impostaScena(schermataConSfondo(pannello));
     }
 
@@ -259,6 +264,16 @@ public class ApplicazioneSoulSword extends Application {
                 + " -fx-border-color: #54d7ff; -fx-border-radius: 8; -fx-background-radius: 8;"
                 + " -fx-cursor: hand;");
         return bottone;
+    }
+
+    private Color coloreSoulSword(EvoluzioneSoulSword evoluzione) {
+        if (evoluzione == EvoluzioneSoulSword.LAMA_DI_SANGUE) {
+            return Color.rgb(176, 96, 255);
+        }
+        if (evoluzione == EvoluzioneSoulSword.MIETITRICE_DELL_ALBA) {
+            return Color.rgb(235, 190, 70);
+        }
+        return Color.WHITE;
     }
 
     private Text testo(String contenuto, int dimensione, FontWeight peso) {
