@@ -119,21 +119,11 @@ gradlew.bat run
 ## Struttura del progetto
 
 - `avvio`: contiene il punto di ingresso dell'applicazione.
-- `modello.personaggi`: contiene `Personaggio`, `Eroe`, `Vampiro`, `TipoVampiro` ed `EvoluzioneSoulSword`.
-- `modello.partita`: contiene `ScenarioGioco`, `FaseGioco` e `StatoPartita`.
-- `modello.combattimento`: contiene `EsitoCombattimento`.
+- `modello`: contiene personaggi, scenari, stato partita ed esito dei combattimenti.
 - `motore`: contiene movimento, combattimento, generazione nemici e gestione degli scenari.
 - `persistenza`: contiene il sistema di salvataggio e caricamento JSON.
 - `interfaccia`: contiene la GUI JavaFX, la vista di gioco e la gestione degli sprite.
 - `resources`: contiene sprite, animazioni, sfondi e icona.
-
-## Package
-
-Tutte le classi sono sotto il package richiesto dalla matricola:
-
-```text
-it.unicam.cs.mpgc.rpg130581
-```
 
 ## Tecnologie utilizzate
 
@@ -144,6 +134,4 @@ it.unicam.cs.mpgc.rpg130581
 
 ## Uso di strumenti di AI
 
-Il progetto e' stato realizzato con supporto AI per chiarire dubbi, organizzare la struttura del codice, impostare alcune parti della GUI JavaFX, controllare i vincoli progettuali e rifinire la documentazione.
-
-Il codice e' stato poi controllato, compreso, modificato e adattato manualmente durante lo sviluppo. L'AI e' stata usata come supporto, non come sostituto della comprensione del progetto.
+Il progetto e' stato realizzato con supporto AI per chiarire dubbi, impostare alcune parti della GUI JavaFX e riuscirea a risolvere e comprendere errori di codice.
