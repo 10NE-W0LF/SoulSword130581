@@ -1,6 +1,7 @@
 package it.unicam.cs.mpgc.rpg130581.motore;
 
 import it.unicam.cs.mpgc.rpg130581.modello.combattimento.EsitoCombattimento;
+import it.unicam.cs.mpgc.rpg130581.modello.combattimento.PozioneCura;
 import it.unicam.cs.mpgc.rpg130581.modello.partita.FaseGioco;
 import it.unicam.cs.mpgc.rpg130581.modello.partita.ScenarioGioco;
 import it.unicam.cs.mpgc.rpg130581.modello.partita.StatoPartita;
@@ -142,8 +143,23 @@ public class MotoreGioco {
                 stato.registraVittoriaScenario();
             }
             vampiri.remove(vampiroVicino);
+            provaDropPozione(vampiroVicino.getVampiro());
             gestisciConclusioneScenario();
         }
+    }
+
+    public void usaPozioneCura() {
+        if (fase != FaseGioco.inGioco) {
+            return;
+        }
+        Eroe eroe = stato.getEroe();
+        if (eroe.usaPozioneCura()) {
+            ultimoMessaggio = "Pozione Cura usata: +" + PozioneCura.valoreCura + " vita.";
+            return;
+        }
+        ultimoMessaggio = eroe.getPozioniCura() <= 0
+                ? "Non hai Pozioni Cura."
+                : "La vita e' gia' al massimo.";
     }
 
     public void evocaBoss() {
@@ -256,6 +272,12 @@ public class MotoreGioco {
         }
     }
 
+    private void provaDropPozione(Vampiro vampiro) {
+        if (PozioneCura.esceDalDrop(random) && stato.getEroe().aggiungiPozioneCura()) {
+            ultimoMessaggio = vampiro.getTipo().getNomeVisualizzato() + " lascia una Pozione Cura.";
+        }
+    }
+
     private void gestisciConclusioneScenario() {
         ScenarioGioco scenario = stato.getScenarioCorrente();
         if (scenario.isScenarioBoss()) {
@@ -353,7 +375,7 @@ public class MotoreGioco {
     private StatoPartita copiaStato(StatoPartita origine) {
         Eroe eroe = origine.getEroe();
         Eroe copiaEroe = new Eroe(eroe.getLivello(), eroe.getEsperienza(), eroe.getVSconfitti(),
-                eroe.getVita(), eroe.getForza(), eroe.getSalute(), eroe.getStats());
+                eroe.getVita(), eroe.getForza(), eroe.getSalute(), eroe.getStats(), eroe.getPozioniCura());
         return new StatoPartita(copiaEroe, origine.isBossSconfitto(),
                 origine.getNumeroScenario(), origine.getSconfittiNelloScenario());
     }
