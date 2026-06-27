@@ -33,6 +33,7 @@ public class Salvataggi implements ArchivioPartita {
                 + "    \"forza\": " + eroe.getForza() + ",\n"
                 + "    \"salute\": " + eroe.getSalute() + ",\n"
                 + "    \"stats\": " + eroe.getStats() + ",\n"
+                + "    \"pozioniCura\": " + eroe.getPozioniCura() + ",\n"
                 + "    \"vita\": " + eroe.getVita() + "\n"
                 + "  },\n"
                 + "  \"numeroScenario\": " + stato.getNumeroScenario() + ",\n"
@@ -57,6 +58,7 @@ public class Salvataggi implements ArchivioPartita {
         String vecchiaChiaveStats = "punti" + "Statistiche";
         int stats = leggiIntero(contenutoJson, "stats",
                 leggiIntero(contenutoJson, vecchiaChiaveStats, statsPredefiniti));
+        int pozioniCura = leggiIntero(contenutoJson, "pozioniCura", 0);
         Eroe eroe = new Eroe(
                 livello,
                 leggiIntero(contenutoJson, "esperienza", 0),
@@ -64,7 +66,8 @@ public class Salvataggi implements ArchivioPartita {
                 leggiIntero(contenutoJson, "vita", 108),
                 forza,
                 salute,
-                stats
+                stats,
+                pozioniCura
         );
 
         return new StatoPartita(
