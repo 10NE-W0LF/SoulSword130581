@@ -41,6 +41,10 @@ public class ArchivioSprite {
         return caricaRisorsa("/sfondi/SoulSwordIcon.png");
     }
 
+    public Image pozioneCura() {
+        return caricaRisorsa("/consumabili/pozione_cura.png");
+    }
+
     private int livelloAssetEroe(EvoSoulSword evoluzione) {
         if (evoluzione == EvoSoulSword.mietitriceDellAlba) {
             return 3;
