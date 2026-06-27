@@ -1,6 +1,6 @@
 package it.unicam.cs.mpgc.rpg130581.modello.personaggi;
 
-public enum EvoluzioneSoulSword {
+public enum EvoSoulSword {
     risvegliata(1, "SoulSword: Risvegliata"),
     lamaDiSangue(10, "SoulSword: Lama di Sangue"),
     mietitriceDellAlba(20, "SoulSword: Mietitrice dell'Alba");
@@ -8,7 +8,7 @@ public enum EvoluzioneSoulSword {
     private final int requiredLevel;
     private final String nomeVisualizzato;
 
-    EvoluzioneSoulSword(int requiredLevel, String nomeVisualizzato) {
+    EvoSoulSword(int requiredLevel, String nomeVisualizzato) {
         this.requiredLevel = requiredLevel;
         this.nomeVisualizzato = nomeVisualizzato;
     }
@@ -21,7 +21,7 @@ public enum EvoluzioneSoulSword {
         return nomeVisualizzato;
     }
 
-    public static EvoluzioneSoulSword daLivello(int livello) {
+    public static EvoSoulSword daLivello(int livello) {
         if (livello >= mietitriceDellAlba.requiredLevel) {
             return mietitriceDellAlba;
         }

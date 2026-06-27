@@ -8,22 +8,22 @@ public class Eroe extends Personaggio {
     private static final String nome = "Zephyr Ragnar";
 
     private int esperienza;
-    private int vampiriSconfitti;
+    private int vSconfitti;
     private int stats;
 
     public Eroe() {
         this(1, 0, 0, 108, 0, 0, 0);
     }
 
-    public Eroe(int livello, int esperienza, int vampiriSconfitti, int vita) {
-        this(livello, esperienza, vampiriSconfitti, vita, 0, 0, 0);
+    public Eroe(int livello, int esperienza, int vSconfitti, int vita) {
+        this(livello, esperienza, vSconfitti, vita, 0, 0, 0);
     }
 
-    public Eroe(int livello, int esperienza, int vampiriSconfitti, int vita,
+    public Eroe(int livello, int esperienza, int vSconfitti, int vita,
                 int forza, int salute, int stats) {
         super(Math.max(1, Math.min(livelloMassimo, livello)), vita, forza, salute);
         this.esperienza = getLivello() == livelloMassimo ? 0 : Math.max(0, esperienza);
-        this.vampiriSconfitti = Math.max(0, vampiriSconfitti);
+        this.vSconfitti = Math.max(0, vSconfitti);
         this.stats = normalizzaStats(stats);
         impostaVita(vita);
     }
@@ -48,7 +48,7 @@ public class Eroe extends Personaggio {
     }
 
     public void registraVittoria() {
-        vampiriSconfitti++;
+        vSconfitti++;
     }
 
     public void rinascita() {
@@ -80,7 +80,7 @@ public class Eroe extends Personaggio {
 
     @Override
     public int getPotenzaAttacco() {
-        return 12 + getLivello() * 4 + getEvoluzioneSoulSword().ordinal() * 10
+        return 12 + getLivello() * 4 + getEvoSoulSword().ordinal() * 10
                 + getForza() * bonusForza;
     }
 
@@ -96,8 +96,8 @@ public class Eroe extends Personaggio {
         return 45 + getLivello() * getLivello() * 10;
     }
 
-    public EvoluzioneSoulSword getEvoluzioneSoulSword() {
-        return EvoluzioneSoulSword.daLivello(getLivello());
+    public EvoSoulSword getEvoSoulSword() {
+        return EvoSoulSword.daLivello(getLivello());
     }
 
     public boolean puoSfidareBoss() {
@@ -116,8 +116,8 @@ public class Eroe extends Personaggio {
         return esperienza;
     }
 
-    public int getVampiriSconfitti() {
-        return vampiriSconfitti;
+    public int getVSconfitti() {
+        return vSconfitti;
     }
 
     public int getStats() {

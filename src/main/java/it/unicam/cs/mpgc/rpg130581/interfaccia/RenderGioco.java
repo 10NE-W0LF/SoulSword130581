@@ -143,7 +143,7 @@ class RenderGioco {
         Posizione posizione = motoreGioco.getPosizioneEroe();
         int riga = rigaDaDirezione(animazioniEroe.getDirezioneX(), animazioniEroe.getDirezioneY());
         TipoAnimazione animazione = animazioneEroe(animazioniEroe);
-        Image foglio = archivioSprite.eroe(eroe.getEvoluzioneSoulSword(), animazione);
+        Image foglio = archivioSprite.eroe(eroe.getEvoSoulSword(), animazione);
         int indice = indiceFotogrammaEroe(foglio, animazione, animazioniEroe.getAttaccoInizioNanos(),
                 fineScenarioRilevataNanos, fotogrammaCorrente);
         boolean ciclica = animazione != TipoAnimazione.death && animazione != TipoAnimazione.attack
@@ -247,7 +247,7 @@ class RenderGioco {
         grafica.setFont(Font.font("SansSerif", 13));
         String livello = eroe.isLivelloMassimo() ? "Livello 30 MAX" : "Livello " + eroe.getLivello();
         grafica.fillText(eroe.getNome() + " - " + livello + " - "
-                + eroe.getEvoluzioneSoulSword().getNomeVisualizzato(), 236, 67);
+                + eroe.getEvoSoulSword().getNomeVisualizzato(), 236, 67);
         grafica.fillText("Nemici: " + motoreGioco.getStato().getSconfittiNelloScenario()
                 + "/" + motoreGioco.getScenarioCorrente().getNemiciRegolari(), 236, 91);
         grafica.fillText("WASD/Frecce: muovi | SHIFT: corsa | SPAZIO: attacca | ESC: pausa", 28, 108);
