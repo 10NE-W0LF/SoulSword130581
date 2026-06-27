@@ -175,6 +175,9 @@ public class AppSoulSword extends Application {
             }
             if (evento.getCode() == KeyCode.SPACE) {
                 vistaGioco.attacca();
+            } else if (evento.getCode() == KeyCode.T) {
+                motoreGioco.usaPozioneCura();
+                vistaGioco.disegna();
             } else if (evento.getCode() == KeyCode.ESCAPE) {
                 pausaAperta[0] = true;
                 mostraPausa(radice, vistaGioco, pausaAperta);
