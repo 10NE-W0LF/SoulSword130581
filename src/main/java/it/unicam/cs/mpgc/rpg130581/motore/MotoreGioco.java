@@ -20,7 +20,7 @@ public class MotoreGioco {
     public static final int LARGHEZZA_MONDO = 960;
     public static final int ALTEZZA_MONDO = 620;
     public static final int RAGGIO_ATTACCO = 88;
-    private static final double RAGGIO_DANNO_CONTATTO = 44.0;
+    private static final double RAGGIO_DANNO_CONTATTO = 38.0;
     private static final long RICARICA_DANNO_VAMPIRO_MS = 1150;
 
     private final Random random = new Random();
