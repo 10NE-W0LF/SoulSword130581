@@ -6,11 +6,11 @@ import it.unicam.cs.mpgc.rpg130581.modello.personaggi.Vampiro;
 
 import java.util.Random;
 
-public class GeneratoreVampiri {
+public class GeneratoreV {
 
     private final Random random;
 
-    public GeneratoreVampiri(Random random) {
+    public GeneratoreV(Random random) {
         this.random = random;
     }
 
