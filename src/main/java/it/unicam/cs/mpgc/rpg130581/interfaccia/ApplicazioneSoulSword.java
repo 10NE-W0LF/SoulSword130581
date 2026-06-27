@@ -77,7 +77,7 @@ public class ApplicazioneSoulSword extends Application {
     private void mostraMenuScenari() {
         Eroe eroe = motoreGioco.getStato().getEroe();
 
-        ImageView immagineEroe = new ImageView(archivioSprite.eroe(eroe.getEvoluzioneSoulSword(), TipoAnimazione.IDLE));
+        ImageView immagineEroe = new ImageView(archivioSprite.eroe(eroe.getEvoluzioneSoulSword(), TipoAnimazione.idle));
         immagineEroe.setViewport(new Rectangle2D(0, 0, 64, 64));
         immagineEroe.setFitWidth(170);
         immagineEroe.setFitHeight(170);
@@ -93,7 +93,33 @@ public class ApplicazioneSoulSword extends Application {
         livelloEroe.setFill(coloreEvoluzione);
         soulSword.setFill(coloreEvoluzione);
 
-        VBox schedaEroe = new VBox(12, immagineEroe, nomeEroe, livelloEroe, soulSword);
+        Text stats = testo("Punti stats: " + eroe.getStats(), 15, FontWeight.BOLD);
+        Text forza = testo("Forza: " + eroe.getForza()
+                + "  (Danno +" + eroe.getForza() * Eroe.bonusForza + ")", 14, FontWeight.NORMAL);
+        Text salute = testo("Salute: " + eroe.getSalute()
+                + "  (Vita +" + eroe.getSalute() * Eroe.bonusSalute + ")", 14, FontWeight.NORMAL);
+
+        Button aumentaForza = bottoneStatistica("Forza +");
+        aumentaForza.setDisable(eroe.getStats() <= 0);
+        aumentaForza.setOnAction(ignored -> {
+            if (eroe.aumentaForza()) {
+                mostraMenuScenari();
+            }
+        });
+
+        Button aumentaSalute = bottoneStatistica("Salute +");
+        aumentaSalute.setDisable(eroe.getStats() <= 0);
+        aumentaSalute.setOnAction(ignored -> {
+            if (eroe.aumentaSalute()) {
+                mostraMenuScenari();
+            }
+        });
+
+        HBox comandiStatistiche = new HBox(8, aumentaForza, aumentaSalute);
+        comandiStatistiche.setAlignment(Pos.CENTER);
+
+        VBox schedaEroe = new VBox(12, immagineEroe, nomeEroe, livelloEroe, soulSword,
+                stats, forza, salute, comandiStatistiche);
         schedaEroe.setAlignment(Pos.CENTER);
         schedaEroe.setPadding(new Insets(28));
         schedaEroe.setMinWidth(280);
@@ -130,7 +156,7 @@ public class ApplicazioneSoulSword extends Application {
         motoreGioco.avviaScenario(scenario);
         VistaGioco vistaGioco = new VistaGioco(motoreGioco, this::mostraSchermataEsito);
         StackPane radice = new StackPane(vistaGioco);
-        Scene scena = new Scene(radice, MotoreGioco.LARGHEZZA_MONDO, MotoreGioco.ALTEZZA_MONDO);
+        Scene scena = new Scene(radice, MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
         final boolean[] pausaAperta = {false};
         scena.setOnKeyPressed(evento -> {
             if (pausaAperta[0]) {
@@ -163,7 +189,7 @@ public class ApplicazioneSoulSword extends Application {
         VBox pannello = pannelloMenu();
         pannello.getChildren().addAll(titolo, nota, gioca, selezioneScenario);
 
-        Rectangle ombra = new Rectangle(MotoreGioco.LARGHEZZA_MONDO, MotoreGioco.ALTEZZA_MONDO);
+        Rectangle ombra = new Rectangle(MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
         ombra.setFill(Color.rgb(0, 0, 0, 0.62));
         StackPane overlay = new StackPane(ombra, pannello);
 
@@ -184,7 +210,7 @@ public class ApplicazioneSoulSword extends Application {
     }
 
     private void mostraSchermataEsito() {
-        boolean vittoria = motoreGioco.getFase() == FaseGioco.VITTORIA;
+        boolean vittoria = motoreGioco.getFase() == FaseGioco.vittoria;
         ScenarioGioco scenarioConcluso = motoreGioco.getScenarioCorrente();
         String messaggioFinale = motoreGioco.getUltimoMessaggio();
         if (vittoria) {
@@ -234,12 +260,12 @@ public class ApplicazioneSoulSword extends Application {
         StackPane radice = new StackPane();
         Image immagine = archivioSprite.iconaSoulSword();
         ImageView sfondo = new ImageView(immagine);
-        sfondo.setFitWidth(MotoreGioco.LARGHEZZA_MONDO);
-        sfondo.setFitHeight(MotoreGioco.ALTEZZA_MONDO);
+        sfondo.setFitWidth(MotoreGioco.larghezzaMondo);
+        sfondo.setFitHeight(MotoreGioco.altezzaMondo);
         sfondo.setPreserveRatio(false);
         sfondo.setSmooth(false);
 
-        Rectangle ombra = new Rectangle(MotoreGioco.LARGHEZZA_MONDO, MotoreGioco.ALTEZZA_MONDO);
+        Rectangle ombra = new Rectangle(MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
         ombra.setFill(Color.rgb(0, 0, 0, 0.58));
 
         radice.getChildren().addAll(sfondo, ombra, contenuto);
@@ -266,11 +292,22 @@ public class ApplicazioneSoulSword extends Application {
         return bottone;
     }
 
+    private Button bottoneStatistica(String testo) {
+        Button bottone = new Button(testo);
+        bottone.setMinWidth(96);
+        bottone.setMinHeight(34);
+        bottone.setFont(Font.font("SansSerif", FontWeight.BOLD, 13));
+        bottone.setStyle("-fx-background-color: #182836; -fx-text-fill: white;"
+                + " -fx-border-color: #8fb7ff; -fx-border-radius: 7; -fx-background-radius: 7;"
+                + " -fx-cursor: hand;");
+        return bottone;
+    }
+
     private Color coloreSoulSword(EvoluzioneSoulSword evoluzione) {
-        if (evoluzione == EvoluzioneSoulSword.LAMA_DI_SANGUE) {
+        if (evoluzione == EvoluzioneSoulSword.lamaDiSangue) {
             return Color.rgb(176, 96, 255);
         }
-        if (evoluzione == EvoluzioneSoulSword.MIETITRICE_DELL_ALBA) {
+        if (evoluzione == EvoluzioneSoulSword.mietitriceDellAlba) {
             return Color.rgb(235, 190, 70);
         }
         return Color.WHITE;
@@ -284,7 +321,7 @@ public class ApplicazioneSoulSword extends Application {
     }
 
     private void impostaScena(Parent radice) {
-        Scene scena = new Scene(radice, MotoreGioco.LARGHEZZA_MONDO, MotoreGioco.ALTEZZA_MONDO);
+        Scene scena = new Scene(radice, MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
         finestra.setScene(scena);
     }
 }

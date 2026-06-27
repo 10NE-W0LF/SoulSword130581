@@ -17,11 +17,11 @@ import java.util.Random;
 
 public class MotoreGioco {
 
-    public static final int LARGHEZZA_MONDO = 960;
-    public static final int ALTEZZA_MONDO = 620;
-    public static final int RAGGIO_ATTACCO = 88;
-    private static final double RAGGIO_DANNO_CONTATTO = 38.0;
-    private static final long RICARICA_DANNO_VAMPIRO_MS = 1150;
+    public static final int larghezzaMondo = 960;
+    public static final int altezzaMondo = 620;
+    public static final int raggioAttacco = 88;
+    private static final double raggioDannoContatto = 38.0;
+    private static final long ricaricaDannoVampiroMs = 1150;
 
     private final Random random = new Random();
     private final GeneratoreVampiri generatoreVampiri = new GeneratoreVampiri(random);
@@ -31,7 +31,7 @@ public class MotoreGioco {
     private StatoPartita stato = new StatoPartita();
     private StatoPartita statoPrimaScenario;
     private Posizione posizioneEroe = nuovaPosizioneCentrale();
-    private FaseGioco fase = FaseGioco.SELEZIONE_SCENARIO;
+    private FaseGioco fase = FaseGioco.selezioneScenario;
     private String ultimoMessaggio = "La SoulSword attende una nuova caccia.";
     private long ultimoDannoEroeMillis;
 
@@ -44,7 +44,7 @@ public class MotoreGioco {
         statoPrimaScenario = null;
         vampiri.clear();
         posizioneEroe = nuovaPosizioneCentrale();
-        fase = FaseGioco.SELEZIONE_SCENARIO;
+        fase = FaseGioco.selezioneScenario;
         ultimoMessaggio = "Nuova partita creata. Scegli uno scenario.";
     }
 
@@ -53,7 +53,7 @@ public class MotoreGioco {
         stato.impostaScenario(scenario);
         vampiri.clear();
         posizioneEroe = nuovaPosizioneCentrale();
-        fase = FaseGioco.IN_GIOCO;
+        fase = FaseGioco.inGioco;
         ultimoDannoEroeMillis = 0;
         ultimoMessaggio = "Scenario avviato: " + scenario.getNomeVisualizzato() + ".";
         generaVampiriIniziali();
@@ -66,32 +66,32 @@ public class MotoreGioco {
     }
 
     public void annullaScenarioSenzaProgressi() {
-        if (statoPrimaScenario != null && fase != FaseGioco.VITTORIA) {
+        if (statoPrimaScenario != null && fase != FaseGioco.vittoria) {
             stato = copiaStato(statoPrimaScenario);
             ultimoMessaggio = "Scenario interrotto. I progressi non sono stati salvati.";
         }
         statoPrimaScenario = null;
         vampiri.clear();
         posizioneEroe = nuovaPosizioneCentrale();
-        fase = FaseGioco.SELEZIONE_SCENARIO;
+        fase = FaseGioco.selezioneScenario;
     }
 
     public void confermaVittoriaScenario() {
         statoPrimaScenario = null;
         vampiri.clear();
         posizioneEroe = nuovaPosizioneCentrale();
-        fase = FaseGioco.SELEZIONE_SCENARIO;
+        fase = FaseGioco.selezioneScenario;
     }
 
     public void muoviEroe(double dx, double dy) {
-        if (fase != FaseGioco.IN_GIOCO) {
+        if (fase != FaseGioco.inGioco) {
             return;
         }
-        posizioneEroe.muovi(dx, dy, LARGHEZZA_MONDO - 80, ALTEZZA_MONDO - 80);
+        posizioneEroe.muovi(dx, dy, larghezzaMondo - 80, altezzaMondo - 80);
     }
 
     public void aggiornaMondo() {
-        if (fase != FaseGioco.IN_GIOCO) {
+        if (fase != FaseGioco.inGioco) {
             return;
         }
         if (deveGenerareVampiroRegolare()) {
@@ -101,14 +101,14 @@ public class MotoreGioco {
         for (VampiroNelMondo vampiroNelMondo : vampiri) {
             inseguiEroe(vampiroNelMondo);
             provaADanneggiareEroe(vampiroNelMondo);
-            if (fase != FaseGioco.IN_GIOCO) {
+            if (fase != FaseGioco.inGioco) {
                 return;
             }
         }
     }
 
     public void attaccaNemicoVicino() {
-        if (fase != FaseGioco.IN_GIOCO) {
+        if (fase != FaseGioco.inGioco) {
             return;
         }
         VampiroNelMondo vampiroVicino = vampiroVicinoNelRaggio();
@@ -129,7 +129,7 @@ public class MotoreGioco {
             return;
         }
         if (esito.isVampiroSconfitto()) {
-            if (vampiroVicino.getVampiro().getTipo() == TipoVampiro.ARCIDUCA) {
+            if (vampiroVicino.getVampiro().getTipo() == TipoVampiro.arciduca) {
                 stato.setBossSconfitto(true);
             } else {
                 stato.registraVittoriaScenario();
@@ -140,7 +140,7 @@ public class MotoreGioco {
     }
 
     public void evocaBoss() {
-        if (fase != FaseGioco.IN_GIOCO) {
+        if (fase != FaseGioco.inGioco) {
             return;
         }
         ScenarioGioco scenario = stato.getScenarioCorrente();
@@ -184,7 +184,7 @@ public class MotoreGioco {
             statoPrimaScenario = null;
             vampiri.clear();
             posizioneEroe = nuovaPosizioneCentrale();
-            fase = FaseGioco.SELEZIONE_SCENARIO;
+            fase = FaseGioco.selezioneScenario;
             ultimoMessaggio = "Partita caricata. Scegli uno scenario.";
         } catch (IOException exception) {
             ultimoMessaggio = "Caricamento fallito: " + exception.getMessage();
@@ -217,7 +217,7 @@ public class MotoreGioco {
     private int vampiriRegolariAttivi() {
         int conteggio = 0;
         for (VampiroNelMondo vampiroNelMondo : vampiri) {
-            if (vampiroNelMondo.getVampiro().getTipo() != TipoVampiro.ARCIDUCA) {
+            if (vampiroNelMondo.getVampiro().getTipo() != TipoVampiro.arciduca) {
                 conteggio++;
             }
         }
@@ -231,7 +231,7 @@ public class MotoreGioco {
 
     private boolean bossAttivo() {
         for (VampiroNelMondo vampiroNelMondo : vampiri) {
-            if (vampiroNelMondo.getVampiro().getTipo() == TipoVampiro.ARCIDUCA) {
+            if (vampiroNelMondo.getVampiro().getTipo() == TipoVampiro.arciduca) {
                 return true;
             }
         }
@@ -253,20 +253,20 @@ public class MotoreGioco {
         ScenarioGioco scenario = stato.getScenarioCorrente();
         if (scenario.isScenarioBoss()) {
             if (stato.isBossSconfitto()) {
-                fase = FaseGioco.VITTORIA;
+                fase = FaseGioco.vittoria;
                 ultimoMessaggio = "Vittoria! La Throne Room e' libera e la caccia e' conclusa.";
             }
             return;
         }
 
         if (nemiciRegolariEliminati()) {
-            fase = FaseGioco.VITTORIA;
+            fase = FaseGioco.vittoria;
             ultimoMessaggio = "Vittoria! Hai completato " + scenario.getNomeVisualizzato() + ".";
         }
     }
 
     private void terminaConGameOver(String messaggio) {
-        fase = FaseGioco.GAME_OVER;
+        fase = FaseGioco.gameOver;
         vampiri.clear();
         ultimoMessaggio = messaggio;
     }
@@ -274,19 +274,19 @@ public class MotoreGioco {
     private Posizione posizioneCasualeSulBordo() {
         int lato = random.nextInt(4);
         if (lato == 0) {
-            return new Posizione(20, random.nextInt(ALTEZZA_MONDO - 80) + 20);
+            return new Posizione(20, random.nextInt(altezzaMondo - 80) + 20);
         }
         if (lato == 1) {
-            return new Posizione(LARGHEZZA_MONDO - 100, random.nextInt(ALTEZZA_MONDO - 80) + 20);
+            return new Posizione(larghezzaMondo - 100, random.nextInt(altezzaMondo - 80) + 20);
         }
         if (lato == 2) {
-            return new Posizione(random.nextInt(LARGHEZZA_MONDO - 100) + 20, 20);
+            return new Posizione(random.nextInt(larghezzaMondo - 100) + 20, 20);
         }
-        return new Posizione(random.nextInt(LARGHEZZA_MONDO - 100) + 20, ALTEZZA_MONDO - 100);
+        return new Posizione(random.nextInt(larghezzaMondo - 100) + 20, altezzaMondo - 100);
     }
 
     private Posizione nuovaPosizioneCentrale() {
-        return new Posizione(LARGHEZZA_MONDO / 2.0, ALTEZZA_MONDO / 2.0);
+        return new Posizione(larghezzaMondo / 2.0, altezzaMondo / 2.0);
     }
 
     private void inseguiEroe(VampiroNelMondo vampiroNelMondo) {
@@ -297,15 +297,15 @@ public class MotoreGioco {
         double velocita = velocitaPer(vampiroNelMondo.getVampiro().getTipo());
         double movimentoX = dx / distanza * velocita;
         double movimentoY = dy / distanza * velocita;
-        posizioneNemico.muovi(movimentoX, movimentoY, LARGHEZZA_MONDO - 80, ALTEZZA_MONDO - 80);
+        posizioneNemico.muovi(movimentoX, movimentoY, larghezzaMondo - 80, altezzaMondo - 80);
         vampiroNelMondo.registraMovimento(movimentoX, movimentoY);
     }
 
     private double velocitaPer(TipoVampiro tipo) {
-        if (tipo == TipoVampiro.ARCIDUCA) {
+        if (tipo == TipoVampiro.arciduca) {
             return 0.42;
         }
-        if (tipo == TipoVampiro.VAMPIRO_ELITE) {
+        if (tipo == TipoVampiro.vampiroElite) {
             return 0.58;
         }
         return 0.48;
@@ -314,8 +314,8 @@ public class MotoreGioco {
     private void provaADanneggiareEroe(VampiroNelMondo vampiroNelMondo) {
         double distanza = vampiroNelMondo.getPosizione().distanzaDa(posizioneEroe);
         long adesso = System.currentTimeMillis();
-        if (distanza <= RAGGIO_DANNO_CONTATTO
-                && vampiroNelMondo.puoAttaccare(adesso, RICARICA_DANNO_VAMPIRO_MS)) {
+        if (distanza <= raggioDannoContatto
+                && vampiroNelMondo.puoAttaccare(adesso, ricaricaDannoVampiroMs)) {
             int danno = Math.max(1, vampiroNelMondo.getVampiro().getPotenzaAttacco() / 2 + random.nextInt(4));
             stato.getEroe().subisciDanno(danno);
             vampiroNelMondo.registraAttacco(adesso);
@@ -333,7 +333,7 @@ public class MotoreGioco {
         double distanzaMinima = Double.MAX_VALUE;
         for (VampiroNelMondo vampiroNelMondo : vampiri) {
             double distanza = vampiroNelMondo.getPosizione().distanzaDa(posizioneEroe);
-            if (distanza <= RAGGIO_ATTACCO && distanza < distanzaMinima) {
+            if (distanza <= raggioAttacco && distanza < distanzaMinima) {
                 vampiroVicino = vampiroNelMondo;
                 distanzaMinima = distanza;
             }
@@ -343,7 +343,8 @@ public class MotoreGioco {
 
     private StatoPartita copiaStato(StatoPartita origine) {
         Eroe eroe = origine.getEroe();
-        Eroe copiaEroe = new Eroe(eroe.getLivello(), eroe.getEsperienza(), eroe.getVampiriSconfitti(), eroe.getVita());
+        Eroe copiaEroe = new Eroe(eroe.getLivello(), eroe.getEsperienza(), eroe.getVampiriSconfitti(),
+                eroe.getVita(), eroe.getForza(), eroe.getSalute(), eroe.getStats());
         return new StatoPartita(copiaEroe, origine.isBossSconfitto(),
                 origine.getNumeroScenario(), origine.getSconfittiNelloScenario());
     }

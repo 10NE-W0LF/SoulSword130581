@@ -30,6 +30,9 @@ public class Salvataggi implements ArchivioPartita {
                 + "    \"livello\": " + eroe.getLivello() + ",\n"
                 + "    \"esperienza\": " + eroe.getEsperienza() + ",\n"
                 + "    \"vampiriSconfitti\": " + eroe.getVampiriSconfitti() + ",\n"
+                + "    \"forza\": " + eroe.getForza() + ",\n"
+                + "    \"salute\": " + eroe.getSalute() + ",\n"
+                + "    \"stats\": " + eroe.getStats() + ",\n"
                 + "    \"vita\": " + eroe.getVita() + "\n"
                 + "  },\n"
                 + "  \"numeroScenario\": " + stato.getNumeroScenario() + ",\n"
@@ -47,11 +50,21 @@ public class Salvataggi implements ArchivioPartita {
         }
 
         String contenutoJson = new String(Files.readAllBytes(percorsoSalvataggio), StandardCharsets.UTF_8);
+        int livello = leggiIntero(contenutoJson, "livello", 1);
+        int forza = leggiIntero(contenutoJson, "forza", 0);
+        int salute = leggiIntero(contenutoJson, "salute", 0);
+        int statsPredefiniti = Math.max(0, livello - 1 - forza - salute);
+        String vecchiaChiaveStats = "punti" + "Statistiche";
+        int stats = leggiIntero(contenutoJson, "stats",
+                leggiIntero(contenutoJson, vecchiaChiaveStats, statsPredefiniti));
         Eroe eroe = new Eroe(
-                leggiIntero(contenutoJson, "livello", 1),
+                livello,
                 leggiIntero(contenutoJson, "esperienza", 0),
                 leggiIntero(contenutoJson, "vampiriSconfitti", 0),
-                leggiIntero(contenutoJson, "vita", 108)
+                leggiIntero(contenutoJson, "vita", 108),
+                forza,
+                salute,
+                stats
         );
 
         return new StatoPartita(
