@@ -1,7 +1,7 @@
 package it.unicam.cs.mpgc.rpg130581.avvio;
 
 import it.unicam.cs.mpgc.rpg130581.motore.MotoreGioco;
-import it.unicam.cs.mpgc.rpg130581.interfaccia.ApplicazioneSoulSword;
+import it.unicam.cs.mpgc.rpg130581.interfaccia.AppSoulSword;
 import it.unicam.cs.mpgc.rpg130581.persistenza.Salvataggi;
 import javafx.application.Application;
 
@@ -14,7 +14,7 @@ public final class Main {
 
     public static void main(String[] args) {
         Salvataggi salvataggi = new Salvataggi(Paths.get("data", "save.json"));
-        ApplicazioneSoulSword.setMotoreGioco(new MotoreGioco(salvataggi));
-        Application.launch(ApplicazioneSoulSword.class, args);
+        AppSoulSword.setMotoreGioco(new MotoreGioco(salvataggi));
+        Application.launch(AppSoulSword.class, args);
     }
 }
