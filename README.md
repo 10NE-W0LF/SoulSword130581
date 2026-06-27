@@ -23,8 +23,7 @@ Il livello massimo dell'eroe e' 30. Ogni volta che Zephyr Ragnar sale di livello
 ### Prerequisiti
 
 - Java 25 LTS
-- Gradle Wrapper incluso nel progetto
-- Connessione internet al primo avvio, se Gradle e JavaFX non sono gia' presenti in cache
+- Gradle 9.1.0
 
 ### Istruzioni
 
@@ -38,23 +37,10 @@ cd SoulSword130581
 ```bash
 ./gradlew build
 ```
-
-Su Windows:
-
-```cmd
-gradlew.bat build
-```
-
 ### Esecuzione
 
 ```bash
 ./gradlew run
-```
-
-Su Windows:
-
-```cmd
-gradlew.bat run
 ```
 
 ## Funzionalita' Principali
@@ -74,6 +60,13 @@ gradlew.bat run
 - Danno dei vampiri influenzato dal loro livello
 - I vampiri possono danneggiare l'eroe a contatto
 
+### Consumabili
+
+- I vampiri hanno una bassa probabilita' di rilasciare una **Pozione Cura** quando vengono sconfitti
+- L'eroe puo' portare al massimo 3 Pozioni Cura
+- Le pozioni non usate restano disponibili negli scenari successivi
+- La Pozione Cura recupera una quantita' moderata di vita e puo' essere usata durante il gioco con il tasto **T**
+
 ### Nemici
 
 - **Vampiro**: nemico base con livello casuale tra 1 e 6
@@ -87,6 +80,7 @@ gradlew.bat run
 - **Castle**: scenario intermedio nel castello
 - **Terrace**: scenario avanzato con nemici piu' forti
 - **Throne Room**: scenario finale con l'Arciduca Vampiro
+- Gli scenari vengono sbloccati in ordine: per accedere allo scenario successivo bisogna completare quello corrente
 
 ### Missione
 
@@ -100,22 +94,25 @@ gradlew.bat run
 - Salvataggio della partita in formato JSON
 - File di salvataggio locale in `data/save.json`
 - I progressi gia' salvati restano disponibili anche se l'eroe viene sconfitto
+- Le Pozioni Cura possedute vengono salvate insieme ai progressi dell'eroe
 
 ### Grafica
 
-- Sprite dell'eroe provenienti dal pacchetto Craftpix Swordsman
-- Sprite dei vampiri provenienti dal pacchetto Craftpix Vampire
-- Sfondi per foresta, castello, terrazza e sala del trono
-- Animazioni tramite sprite sheet
+- Sprite dell'eroe provenienti dal pacchetto Craftpix Swordsman scaricati dal seguente sito https://craftpix.net
+- Sprite dei vampiri provenienti dal pacchetto Craftpix Vampire scaricati dal seguente sito https://craftpix.net
+- Sfondi per foresta, castello, terrazza e sala del trono scaricati dal seguente sito https://craftpix.net
+- Icona della Pozione Cura proveniente dal pacchetto Craftpix Magic Potions scaricato dal seguente sito https://craftpix.net
+- Animazioni tramite sprite sheet 
 
 ### Comandi
 
 - **WASD** o **Frecce direzionali** per muoversi.
 - **SHIFT** per correre.
 - **Spazio** per attaccare.
+- **T** per usare una Pozione Cura.
 - **ESC** per mettere in pausa.
-- **Salva stato eroe** per salvare la partita.
-- **Carica partita** per caricare un salvataggio.
+- **Salva** per salvare la partita dal menu di selezione scenario.
+- **Carica partita** per caricare un salvataggio dal menu principale.
 
 ## Struttura del progetto
 
@@ -130,9 +127,16 @@ gradlew.bat run
 
 - Java 25
 - JavaFX 25.0.3
-- Gradle Wrapper
+- Gradle Wrapper 9.1.0
 - JSON per la persistenza
 
 ## Uso di strumenti di AI
 
-Il progetto e' stato realizzato con supporto AI per chiarire dubbi, impostare alcune parti della GUI JavaFX e riuscirea a risolvere e comprendere errori di codice.
+Per lo sviluppo di SoulSword e' stato utilizzato un assistente AI come supporto alla programmazione. L'intelligenza artificiale e' stata impiegata come strumento tecnico per superare ostacoli implementativi, chiarire concetti teorici e migliorare alcune parti del codice, mantenendo la piena paternita' logica e progettuale del software.
+
+Attivita' svolte con il supporto dell'AI:
+
+- **Debugging e risoluzione errori**: supporto nell'analisi e nella correzione di problemi emersi durante lo sviluppo.
+- **Approfondimento concettuale**: utilizzo dell'AI per comprendere meglio persistenza dei dati, separazione tra modello, motore, interfaccia e principi Clean/SOLID.
+- **Sviluppo dell'interfaccia grafica**: supporto nella realizzazione e rifinitura delle schermate JavaFX, dei menu, dell'HUD di gioco e della gestione degli sprite.
+- **Bilanciamento delle meccaniche**: supporto nella definizione di livelli, statistiche, evoluzioni della SoulSword, vampiri, scenari e consumabili.
