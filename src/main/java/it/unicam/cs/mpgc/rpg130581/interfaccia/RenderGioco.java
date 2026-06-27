@@ -250,7 +250,29 @@ class RenderGioco {
                 + eroe.getEvoSoulSword().getNomeVisualizzato(), 236, 67);
         grafica.fillText("Nemici: " + motoreGioco.getStato().getSconfittiNelloScenario()
                 + "/" + motoreGioco.getScenarioCorrente().getNemiciRegolari(), 236, 91);
-        grafica.fillText("WASD/Frecce: muovi | SHIFT: corsa | SPAZIO: attacca | ESC: pausa", 28, 108);
+        grafica.fillText("WASD/Frecce: muovi | SHIFT: corsa | SPAZIO: attacca | T: pozione | ESC: pausa", 28, 108);
+        disegnaPozioneCura(grafica, eroe);
+    }
+
+    private void disegnaPozioneCura(GraphicsContext grafica, Eroe eroe) {
+        double lato = 62;
+        double x = MotoreGioco.larghezzaMondo - lato - 24;
+        double y = MotoreGioco.altezzaMondo - lato - 24;
+
+        grafica.setFill(Color.rgb(14, 17, 18, 0.84));
+        grafica.fillRoundRect(x, y, lato, lato, 8, 8);
+        grafica.setStroke(Color.rgb(84, 215, 255));
+        grafica.strokeRoundRect(x, y, lato, lato, 8, 8);
+
+        grafica.setImageSmoothing(false);
+        grafica.drawImage(archivioSprite.pozioneCura(), x + 12, y + 10, 38, 38);
+
+        grafica.setFill(Color.rgb(8, 10, 16, 0.92));
+        grafica.fillRoundRect(x + 4, y + 4, 18, 18, 5, 5);
+        grafica.setFill(Color.WHITE);
+        grafica.setFont(Font.font("SansSerif", FontWeight.BOLD, 13));
+        grafica.fillText("T", x + 9, y + 18);
+        grafica.fillText("x" + eroe.getPozioniCura(), x + 38, y + 55);
     }
 
     private void disegnaBarra(GraphicsContext grafica, double x, double y, double larghezza,
