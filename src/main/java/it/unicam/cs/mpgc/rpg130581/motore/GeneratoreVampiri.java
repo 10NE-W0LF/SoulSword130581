@@ -16,13 +16,13 @@ public class GeneratoreVampiri {
 
     public Vampiro creaVampiroRegolare(ScenarioGioco scenario) {
         if (scenario.getProbabilitaElite() > 0 && random.nextDouble() < scenario.getProbabilitaElite()) {
-            return new Vampiro(TipoVampiro.VAMPIRO_ELITE, casualeTra(scenario.getLivelloMinimoElite(), scenario.getLivelloMassimoElite()));
+            return new Vampiro(TipoVampiro.vampiroElite, casualeTra(scenario.getLivelloMinimoElite(), scenario.getLivelloMassimoElite()));
         }
-        return new Vampiro(TipoVampiro.VAMPIRO_BASE, casualeTra(scenario.getLivelloMinimoVampiro(), scenario.getLivelloMassimoVampiro()));
+        return new Vampiro(TipoVampiro.vampiroBase, casualeTra(scenario.getLivelloMinimoVampiro(), scenario.getLivelloMassimoVampiro()));
     }
 
     public Vampiro creaBoss() {
-        return new Vampiro(TipoVampiro.ARCIDUCA, 20);
+        return new Vampiro(TipoVampiro.arciduca, 20);
     }
 
     private int casualeTra(int minimo, int massimo) {

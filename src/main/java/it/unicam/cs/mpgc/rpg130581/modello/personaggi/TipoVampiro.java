@@ -3,9 +3,9 @@ package it.unicam.cs.mpgc.rpg130581.modello.personaggi;
 import java.util.Random;
 
 public enum TipoVampiro {
-    VAMPIRO_BASE(1, 1, 6, "Vampiro"),
-    VAMPIRO_ELITE(2, 7, 15, "ÉliteVampiro"),
-    ARCIDUCA(3, 20, 20, "Arciduca Vampiro");
+    vampiroBase(1, 1, 6, "Vampiro"),
+    vampiroElite(2, 7, 15, "ÉliteVampiro"),
+    arciduca(3, 20, 20, "Arciduca Vampiro");
 
     private final int livelloAsset;
     private final int livelloMinimo;

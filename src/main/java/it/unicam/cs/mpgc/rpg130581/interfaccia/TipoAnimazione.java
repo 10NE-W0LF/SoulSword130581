@@ -1,14 +1,14 @@
 package it.unicam.cs.mpgc.rpg130581.interfaccia;
 
 public enum TipoAnimazione {
-    IDLE("idle"),
-    WALK("walk"),
-    RUN("run"),
-    ATTACK("attack"),
-    WALK_ATTACK("walk_attack"),
-    RUN_ATTACK("run_attack"),
-    HURT("hurt"),
-    DEATH("death");
+    idle("idle"),
+    walk("walk"),
+    run("run"),
+    attack("attack"),
+    walkAttack("walk_attack"),
+    runAttack("run_attack"),
+    hurt("hurt"),
+    death("death");
 
     private final String nomeFile;
 

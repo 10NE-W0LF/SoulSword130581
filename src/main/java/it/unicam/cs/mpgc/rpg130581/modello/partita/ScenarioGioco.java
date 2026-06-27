@@ -4,13 +4,13 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum ScenarioGioco {
-    MARGINE_FORESTA_MORTA(1, "Dead Forest", "/sfondi/dead_forest.png", 8, 3, 1, 3, 0, 0, 0.0, false),
-    PROFONDITA_FORESTA_MORTA(2, "Deep Dead Forest", "/sfondi/dead_forest.png", 12, 4, 3, 6, 0, 0, 0.0, false),
-    CASTELLO(3, "Castle", "/sfondi/castle.png", 15, 5, 5, 6, 7, 10, 0.45, false),
-    TERRAZZA(4, "Terrace", "/sfondi/terrace.png", 16, 6, 5, 6, 10, 15, 0.85, false),
-    SALA_DEL_TRONO(5, "Throne Room", "/sfondi/throne_room.png", 8, 5, 4, 6, 12, 15, 0.55, true);
+    margineForestaMorta(1, "Dead Forest", "/sfondi/dead_forest.png", 8, 3, 1, 3, 0, 0, 0.0, false),
+    profonditaForestaMorta(2, "Deep Dead Forest", "/sfondi/dead_forest.png", 12, 4, 3, 6, 0, 0, 0.0, false),
+    castello(3, "Castle", "/sfondi/castle.png", 15, 5, 5, 6, 7, 10, 0.45, false),
+    terrazza(4, "Terrace", "/sfondi/terrace.png", 16, 6, 5, 6, 10, 15, 0.85, false),
+    salaDelTrono(5, "Throne Room", "/sfondi/throne_room.png", 8, 5, 4, 6, 12, 15, 0.55, true);
 
-    private static final List<ScenarioGioco> SCENARI_ORDINATI = Arrays.asList(values());
+    private static final List<ScenarioGioco> scenariOrdinati = Arrays.asList(values());
 
     private final int numero;
     private final String nomeVisualizzato;
@@ -46,19 +46,19 @@ public enum ScenarioGioco {
                 return scenario;
             }
         }
-        return MARGINE_FORESTA_MORTA;
+        return margineForestaMorta;
     }
 
     public ScenarioGioco successivo() {
-        int indice = SCENARI_ORDINATI.indexOf(this);
-        if (indice < 0 || indice == SCENARI_ORDINATI.size() - 1) {
+        int indice = scenariOrdinati.indexOf(this);
+        if (indice < 0 || indice == scenariOrdinati.size() - 1) {
             return this;
         }
-        return SCENARI_ORDINATI.get(indice + 1);
+        return scenariOrdinati.get(indice + 1);
     }
 
     public boolean isUltimoScenario() {
-        return this == SALA_DEL_TRONO;
+        return this == salaDelTrono;
     }
 
     public int getNumero() {

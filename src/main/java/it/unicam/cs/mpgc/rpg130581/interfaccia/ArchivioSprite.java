@@ -24,14 +24,14 @@ public class ArchivioSprite {
 
     public Image sfondo(ScenarioGioco scenario) {
         switch (scenario) {
-            case CASTELLO:
+            case castello:
                 return caricaRisorsa("/sfondi/castle.png");
-            case TERRAZZA:
+            case terrazza:
                 return caricaRisorsa("/sfondi/terrace.png");
-            case SALA_DEL_TRONO:
+            case salaDelTrono:
                 return caricaRisorsa("/sfondi/throne_room.png");
-            case MARGINE_FORESTA_MORTA:
-            case PROFONDITA_FORESTA_MORTA:
+            case margineForestaMorta:
+            case profonditaForestaMorta:
             default:
                 return caricaRisorsa("/sfondi/dead_forest.png");
         }
@@ -42,10 +42,10 @@ public class ArchivioSprite {
     }
 
     private int livelloAssetEroe(EvoluzioneSoulSword evoluzione) {
-        if (evoluzione == EvoluzioneSoulSword.MIETITRICE_DELL_ALBA) {
+        if (evoluzione == EvoluzioneSoulSword.mietitriceDellAlba) {
             return 3;
         }
-        if (evoluzione == EvoluzioneSoulSword.LAMA_DI_SANGUE) {
+        if (evoluzione == EvoluzioneSoulSword.lamaDiSangue) {
             return 2;
         }
         return 1;

@@ -22,7 +22,7 @@ public class ServizioCombattimento {
         if (vampiro.isSconfitto()) {
             eroe.guadagnaEsperienza(vampiro.getRicompensaEsperienza());
             eroe.registraVittoria();
-            String messaggio = vampiro.getTipo() == TipoVampiro.ARCIDUCA
+            String messaggio = vampiro.getTipo() == TipoVampiro.arciduca
                     ? "L'Arciduca Vampiro e' caduto. L'alba torna sul mondo."
                     : "Vampiro sconfitto. La SoulSword assorbe nuova energia.";
             return new EsitoCombattimento(dannoEroe, 0, true, false, messaggio);
