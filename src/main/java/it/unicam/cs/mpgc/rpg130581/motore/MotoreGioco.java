@@ -24,7 +24,7 @@ public class MotoreGioco {
     private static final long ricaricaDannoVampiroMs = 1150;
 
     private final Random random = new Random();
-    private final GeneratoreVampiri generatoreVampiri = new GeneratoreVampiri(random);
+    private final GeneratoreV generatoreV = new GeneratoreV(random);
     private final ServizioCombattimento servizioCombattimento = new ServizioCombattimento(random);
     private final ArchivioPartita archivioPartita;
     private final List<VampiroNelMondo> vampiri = new ArrayList<VampiroNelMondo>();
@@ -172,7 +172,7 @@ public class MotoreGioco {
             return;
         }
 
-        vampiri.add(new VampiroNelMondo(generatoreVampiri.creaBoss(), posizioneCasualeSulBordo()));
+        vampiri.add(new VampiroNelMondo(generatoreV.creaBoss(), posizioneCasualeSulBordo()));
         ultimoMessaggio = "L'Arciduca Vampiro risponde alla tua sfida.";
     }
 
@@ -206,7 +206,7 @@ public class MotoreGioco {
     }
 
     private void generaVampiroRegolare() {
-        Vampiro vampiro = generatoreVampiri.creaVampiroRegolare(stato.getScenarioCorrente());
+        Vampiro vampiro = generatoreV.creaVampiroRegolare(stato.getScenarioCorrente());
         vampiri.add(new VampiroNelMondo(vampiro, posizioneCasualeSulBordo()));
     }
 
@@ -251,7 +251,7 @@ public class MotoreGioco {
                 && stato.getEroe().puoSfidareBoss()
                 && !stato.isBossSconfitto()
                 && !bossAttivo()) {
-            vampiri.add(new VampiroNelMondo(generatoreVampiri.creaBoss(), posizioneCasualeSulBordo()));
+            vampiri.add(new VampiroNelMondo(generatoreV.creaBoss(), posizioneCasualeSulBordo()));
             ultimoMessaggio = "L'Arciduca Vampiro scende dal trono.";
         }
     }
@@ -352,7 +352,7 @@ public class MotoreGioco {
 
     private StatoPartita copiaStato(StatoPartita origine) {
         Eroe eroe = origine.getEroe();
-        Eroe copiaEroe = new Eroe(eroe.getLivello(), eroe.getEsperienza(), eroe.getVampiriSconfitti(),
+        Eroe copiaEroe = new Eroe(eroe.getLivello(), eroe.getEsperienza(), eroe.getVSconfitti(),
                 eroe.getVita(), eroe.getForza(), eroe.getSalute(), eroe.getStats());
         return new StatoPartita(copiaEroe, origine.isBossSconfitto(),
                 origine.getNumeroScenario(), origine.getSconfittiNelloScenario());

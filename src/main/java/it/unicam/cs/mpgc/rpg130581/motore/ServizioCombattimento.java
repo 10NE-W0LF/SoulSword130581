@@ -29,7 +29,7 @@ public class ServizioCombattimento {
         }
 
         int dannoVampiro = Math.max(1,
-                vampiro.getPotenzaAttacco() + random.nextInt(6) - eroe.getEvoluzioneSoulSword().ordinal() * 3);
+                vampiro.getPotenzaAttacco() + random.nextInt(6) - eroe.getEvoSoulSword().ordinal() * 3);
         eroe.subisciDanno(dannoVampiro);
         boolean eroeSconfitto = eroe.isSconfitto();
 

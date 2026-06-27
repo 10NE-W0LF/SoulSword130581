@@ -29,7 +29,7 @@ public class Salvataggi implements ArchivioPartita {
                 + "  \"eroe\": {\n"
                 + "    \"livello\": " + eroe.getLivello() + ",\n"
                 + "    \"esperienza\": " + eroe.getEsperienza() + ",\n"
-                + "    \"vampiriSconfitti\": " + eroe.getVampiriSconfitti() + ",\n"
+                + "    \"vSconfitti\": " + eroe.getVSconfitti() + ",\n"
                 + "    \"forza\": " + eroe.getForza() + ",\n"
                 + "    \"salute\": " + eroe.getSalute() + ",\n"
                 + "    \"stats\": " + eroe.getStats() + ",\n"
@@ -60,7 +60,7 @@ public class Salvataggi implements ArchivioPartita {
         Eroe eroe = new Eroe(
                 livello,
                 leggiIntero(contenutoJson, "esperienza", 0),
-                leggiIntero(contenutoJson, "vampiriSconfitti", 0),
+                leggiIntero(contenutoJson, "vSconfitti", 0),
                 leggiIntero(contenutoJson, "vita", 108),
                 forza,
                 salute,
