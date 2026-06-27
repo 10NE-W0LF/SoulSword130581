@@ -1,0 +1,24 @@
+# Gradle
+/.gradle/
+/build/
+
+# Output compilazione Java e IDE
+/out/
+*.class
+
+# IntelliJ IDEA
+/.idea/
+*.iml
+
+# Salvataggi locali del gioco
+/data/
+*.save
+
+# Log e file temporanei
+*.log
+*.tmp
+*.bak
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
