@@ -1,5 +1,7 @@
 package it.unicam.cs.mpgc.rpg130581.modello.personaggi;
 
+import it.unicam.cs.mpgc.rpg130581.modello.combattimento.PozioneCura;
+
 public class Eroe extends Personaggio {
 
     public static final int livelloMassimo = 30;
@@ -10,21 +12,28 @@ public class Eroe extends Personaggio {
     private int esperienza;
     private int vSconfitti;
     private int stats;
+    private int pozioniCura;
 
     public Eroe() {
-        this(1, 0, 0, 108, 0, 0, 0);
+        this(1, 0, 0, 108, 0, 0, 0, 0);
     }
 
     public Eroe(int livello, int esperienza, int vSconfitti, int vita) {
-        this(livello, esperienza, vSconfitti, vita, 0, 0, 0);
+        this(livello, esperienza, vSconfitti, vita, 0, 0, 0, 0);
     }
 
     public Eroe(int livello, int esperienza, int vSconfitti, int vita,
                 int forza, int salute, int stats) {
+        this(livello, esperienza, vSconfitti, vita, forza, salute, stats, 0);
+    }
+
+    public Eroe(int livello, int esperienza, int vSconfitti, int vita,
+                int forza, int salute, int stats, int pozioniCura) {
         super(Math.max(1, Math.min(livelloMassimo, livello)), vita, forza, salute);
         this.esperienza = getLivello() == livelloMassimo ? 0 : Math.max(0, esperienza);
         this.vSconfitti = Math.max(0, vSconfitti);
         this.stats = normalizzaStats(stats);
+        this.pozioniCura = Math.max(0, Math.min(PozioneCura.maxPozioni, pozioniCura));
         impostaVita(vita);
     }
 
@@ -78,6 +87,23 @@ public class Eroe extends Personaggio {
         return true;
     }
 
+    public boolean aggiungiPozioneCura() {
+        if (pozioniCura >= PozioneCura.maxPozioni) {
+            return false;
+        }
+        pozioniCura++;
+        return true;
+    }
+
+    public boolean usaPozioneCura() {
+        if (pozioniCura <= 0 || getVita() >= getVitaMassima()) {
+            return false;
+        }
+        pozioniCura--;
+        impostaVita(getVita() + PozioneCura.valoreCura);
+        return true;
+    }
+
     @Override
     public int getPotenzaAttacco() {
         return 12 + getLivello() * 4 + getEvoSoulSword().ordinal() * 10
@@ -122,6 +148,10 @@ public class Eroe extends Personaggio {
 
     public int getStats() {
         return stats;
+    }
+
+    public int getPozioniCura() {
+        return pozioniCura;
     }
 
     private int normalizzaStats(int punti) {
