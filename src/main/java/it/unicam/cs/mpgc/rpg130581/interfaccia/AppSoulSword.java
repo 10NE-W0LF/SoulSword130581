@@ -291,7 +291,7 @@ public class AppSoulSword extends Application {
         pannello.setAlignment(Pos.CENTER);
         pannello.setPadding(new Insets(36));
         pannello.setMaxWidth(620);
-        pannello.setStyle("-fx-background-color: rgba(8, 10, 16, 0.78); -fx-background-radius: 18;");
+        pannello.setStyle("-fx-background-color: transparent;");
         return pannello;
     }
 
