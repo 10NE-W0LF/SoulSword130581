@@ -48,7 +48,12 @@ public class MotoreGioco {
         ultimoMessaggio = "Nuova partita creata. Scegli uno scenario.";
     }
 
-    public void avviaScenario(ScenarioGioco scenario) {
+    public boolean avviaScenario(ScenarioGioco scenario) {
+        if (!stato.isScenarioSbloccato(scenario)) {
+            ultimoMessaggio = "Completa prima lo scenario precedente.";
+            return false;
+        }
+
         statoPrimaScenario = copiaStato(stato);
         stato.impostaScenario(scenario);
         vampiri.clear();
@@ -57,6 +62,7 @@ public class MotoreGioco {
         ultimoDannoEroeMillis = 0;
         ultimoMessaggio = "Scenario avviato: " + scenario.getNomeVisualizzato() + ".";
         generaVampiriIniziali();
+        return true;
     }
 
     public void riavviaScenarioCorrente() {
@@ -77,6 +83,7 @@ public class MotoreGioco {
     }
 
     public void confermaVittoriaScenario() {
+        stato.preparaScenarioSbloccato();
         statoPrimaScenario = null;
         vampiri.clear();
         posizioneEroe = nuovaPosizioneCentrale();
@@ -253,6 +260,7 @@ public class MotoreGioco {
         ScenarioGioco scenario = stato.getScenarioCorrente();
         if (scenario.isScenarioBoss()) {
             if (stato.isBossSconfitto()) {
+                stato.sbloccaScenarioSuccessivo();
                 fase = FaseGioco.vittoria;
                 ultimoMessaggio = "Vittoria! La Throne Room e' libera e la caccia e' conclusa.";
             }
@@ -260,6 +268,7 @@ public class MotoreGioco {
         }
 
         if (nemiciRegolariEliminati()) {
+            stato.sbloccaScenarioSuccessivo();
             fase = FaseGioco.vittoria;
             ultimoMessaggio = "Vittoria! Hai completato " + scenario.getNomeVisualizzato() + ".";
         }

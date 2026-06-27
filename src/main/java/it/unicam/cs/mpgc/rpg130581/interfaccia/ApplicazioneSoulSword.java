@@ -128,11 +128,18 @@ public class ApplicazioneSoulSword extends Application {
         VBox listaScenari = new VBox(10);
         listaScenari.setAlignment(Pos.CENTER_LEFT);
         for (ScenarioGioco scenario : ScenarioGioco.values()) {
+            boolean scenarioSbloccato = motoreGioco.getStato().isScenarioSbloccato(scenario);
             Button bottoneScenario = bottone(scenario.getNumero() + "  " + scenario.getNomeVisualizzato()
                     + "   | Nemici: " + scenario.getNemiciRegolari()
-                    + (scenario.isScenarioBoss() ? "   | Boss" : ""));
+                    + (scenario.isScenarioBoss() ? "   | Boss" : "")
+                    + (scenarioSbloccato ? "" : "   | Bloccato"));
             bottoneScenario.setMaxWidth(Double.MAX_VALUE);
-            bottoneScenario.setOnAction(ignored -> mostraGioco(scenario));
+            bottoneScenario.setDisable(!scenarioSbloccato);
+            bottoneScenario.setOnAction(ignored -> {
+                if (scenarioSbloccato) {
+                    mostraGioco(scenario);
+                }
+            });
             listaScenari.getChildren().add(bottoneScenario);
         }
 
@@ -153,7 +160,11 @@ public class ApplicazioneSoulSword extends Application {
     }
 
     private void mostraGioco(ScenarioGioco scenario) {
-        motoreGioco.avviaScenario(scenario);
+        if (!motoreGioco.avviaScenario(scenario)) {
+            mostraMenuScenari();
+            return;
+        }
+
         VistaGioco vistaGioco = new VistaGioco(motoreGioco, this::mostraSchermataEsito);
         StackPane radice = new StackPane(vistaGioco);
         Scene scena = new Scene(radice, MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);

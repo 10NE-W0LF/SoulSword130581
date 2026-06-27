@@ -6,7 +6,8 @@ public class StatoPartita {
 
     private final Eroe eroe;
     private boolean bossSconfitto;
-    private int numeroScenario;
+    private int numeroScenarioSbloccato;
+    private ScenarioGioco scenarioCorrente;
     private int sconfittiNelloScenario;
 
     public StatoPartita() {
@@ -20,7 +21,8 @@ public class StatoPartita {
     public StatoPartita(Eroe eroe, boolean bossSconfitto, int numeroScenario, int sconfittiNelloScenario) {
         this.eroe = eroe;
         this.bossSconfitto = bossSconfitto;
-        this.numeroScenario = Math.max(1, Math.min(5, numeroScenario));
+        this.numeroScenarioSbloccato = Math.max(1, Math.min(5, numeroScenario));
+        this.scenarioCorrente = ScenarioGioco.daNumero(this.numeroScenarioSbloccato);
         this.sconfittiNelloScenario = Math.max(0, sconfittiNelloScenario);
     }
 
@@ -37,11 +39,11 @@ public class StatoPartita {
     }
 
     public ScenarioGioco getScenarioCorrente() {
-        return ScenarioGioco.daNumero(numeroScenario);
+        return scenarioCorrente;
     }
 
     public int getNumeroScenario() {
-        return numeroScenario;
+        return numeroScenarioSbloccato;
     }
 
     public int getSconfittiNelloScenario() {
@@ -52,16 +54,24 @@ public class StatoPartita {
         sconfittiNelloScenario++;
     }
 
-    public void avanzaScenario() {
-        ScenarioGioco scenarioSuccessivo = getScenarioCorrente().successivo();
-        numeroScenario = scenarioSuccessivo.getNumero();
+    public boolean isScenarioSbloccato(ScenarioGioco scenario) {
+        return scenario.getNumero() <= numeroScenarioSbloccato;
+    }
+
+    public void sbloccaScenarioSuccessivo() {
+        ScenarioGioco scenarioSuccessivo = scenarioCorrente.successivo();
+        numeroScenarioSbloccato = Math.max(numeroScenarioSbloccato, scenarioSuccessivo.getNumero());
+        sconfittiNelloScenario = 0;
+    }
+
+    public void preparaScenarioSbloccato() {
+        scenarioCorrente = ScenarioGioco.daNumero(numeroScenarioSbloccato);
         sconfittiNelloScenario = 0;
         bossSconfitto = false;
-        eroe.curaCompleta();
     }
 
     public void impostaScenario(ScenarioGioco scenario) {
-        numeroScenario = scenario.getNumero();
+        scenarioCorrente = scenario;
         sconfittiNelloScenario = 0;
         bossSconfitto = false;
         eroe.curaCompleta();
