@@ -97,11 +97,11 @@ cd SoulSword130581
 - Le Pozioni Cura possedute vengono salvate insieme ai progressi dell'eroe
 
 ### Grafica
-
-- Sprite dell'eroe provenienti dal pacchetto Craftpix Swordsman scaricati dal seguente sito https://craftpix.net
-- Sprite dei vampiri provenienti dal pacchetto Craftpix Vampire scaricati dal seguente sito https://craftpix.net
-- Sfondi per foresta, castello, terrazza e sala del trono scaricati dal seguente sito https://craftpix.net
-- Icona della Pozione Cura proveniente dal pacchetto Craftpix Magic Potions scaricato dal seguente sito https://craftpix.net
+Tutte le sprite usate in questo gioco sono state prese da questo sito https://craftpix.net
+- Sprite dell'eroe provenienti dal pacchetto Craftpix Swordsman 
+- Sprite dei vampiri provenienti dal pacchetto Craftpix Vampire 
+- Sfondi per foresta, castello, terrazza e sala del trono  
+- Icona della Pozione Cura proveniente dal pacchetto Craftpix Magic Potions scaricato 
 - Animazioni tramite sprite sheet 
 
 ### Comandi
