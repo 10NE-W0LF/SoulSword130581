@@ -1,7 +1,7 @@
 package it.unicam.cs.mpgc.rpg130581.interfaccia;
 
 import it.unicam.cs.mpgc.rpg130581.modello.partita.ScenarioGioco;
-import it.unicam.cs.mpgc.rpg130581.modello.personaggi.EvoluzioneSoulSword;
+import it.unicam.cs.mpgc.rpg130581.modello.personaggi.EvoSoulSword;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.TipoVampiro;
 import javafx.scene.image.Image;
 
@@ -13,7 +13,7 @@ public class ArchivioSprite {
 
     private final Map<String, Image> immagini = new HashMap<String, Image>();
 
-    public Image eroe(EvoluzioneSoulSword evoluzione, TipoAnimazione animazione) {
+    public Image eroe(EvoSoulSword evoluzione, TipoAnimazione animazione) {
         int livelloAsset = livelloAssetEroe(evoluzione);
         return caricaRisorsa("/sprites/hero/level" + livelloAsset + "/" + animazione.getNomeFile() + ".png");
     }
@@ -41,11 +41,11 @@ public class ArchivioSprite {
         return caricaRisorsa("/sfondi/SoulSwordIcon.png");
     }
 
-    private int livelloAssetEroe(EvoluzioneSoulSword evoluzione) {
-        if (evoluzione == EvoluzioneSoulSword.mietitriceDellAlba) {
+    private int livelloAssetEroe(EvoSoulSword evoluzione) {
+        if (evoluzione == EvoSoulSword.mietitriceDellAlba) {
             return 3;
         }
-        if (evoluzione == EvoluzioneSoulSword.lamaDiSangue) {
+        if (evoluzione == EvoSoulSword.lamaDiSangue) {
             return 2;
         }
         return 1;
