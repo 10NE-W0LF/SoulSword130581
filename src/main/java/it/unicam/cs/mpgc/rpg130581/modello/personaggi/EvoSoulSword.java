@@ -1,5 +1,9 @@
 package it.unicam.cs.mpgc.rpg130581.modello.personaggi;
 
+/**
+ * Evoluzioni della SoulSword.
+ * Ogni valore indica il livello minimo richiesto e il nome mostrato nell'interfaccia.
+ */
 public enum EvoSoulSword {
     risvegliata(1, "SoulSword: Risvegliata"),
     lamaDiSangue(10, "SoulSword: Lama di Sangue"),
@@ -13,14 +17,16 @@ public enum EvoSoulSword {
         this.nomeVisualizzato = nomeVisualizzato;
     }
 
-    public int getRequiredLevel() {
-        return requiredLevel;
-    }
-
     public String getNomeVisualizzato() {
         return nomeVisualizzato;
     }
 
+    /**
+     * Restituisce l'evoluzione corretta in base al livello dell'eroe.
+     *
+     * @param livello livello attuale dell'eroe
+     * @return evoluzione della SoulSword corrispondente
+     */
     public static EvoSoulSword daLivello(int livello) {
         if (livello >= mietitriceDellAlba.requiredLevel) {
             return mietitriceDellAlba;

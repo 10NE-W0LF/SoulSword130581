@@ -1,5 +1,10 @@
 package it.unicam.cs.mpgc.rpg130581.modello.personaggi;
 
+/**
+ * Classe base dei personaggi del gioco.
+ * Raccoglie le informazioni comuni a eroe e vampiri, lasciando alle sottoclassi
+ * il calcolo specifico di attacco e vita massima.
+ */
 public abstract class Personaggio {
 
     private int livello;
@@ -7,10 +12,7 @@ public abstract class Personaggio {
     private int forza;
     private int salute;
 
-    protected Personaggio(int livello, int vita) {
-        this(livello, vita, 0, 0);
-    }
-
+    // Inizializza i valori base impedendo livelli, forza, salute o vita negativi.
     protected Personaggio(int livello, int vita, int forza, int salute) {
         this.livello = Math.max(1, livello);
         this.forza = Math.max(0, forza);
@@ -18,10 +20,20 @@ public abstract class Personaggio {
         this.vita = Math.max(0, vita);
     }
 
+    /**
+     * Applica danno al personaggio senza permettere alla vita di scendere sotto zero.
+     *
+     * @param danno danno da subire
+     */
     public void subisciDanno(int danno) {
         vita = Math.max(0, vita - Math.max(0, danno));
     }
 
+    /**
+     * Indica se il personaggio non ha piu' vita.
+     *
+     * @return true se la vita e' pari a zero
+     */
     public boolean isSconfitto() {
         return vita <= 0;
     }
@@ -62,7 +74,17 @@ public abstract class Personaggio {
         return salute;
     }
 
+    /**
+     * Restituisce la potenza offensiva del personaggio.
+     *
+     * @return valore di attacco calcolato dalla sottoclasse
+     */
     public abstract int getPotenzaAttacco();
 
+    /**
+     * Restituisce la vita massima del personaggio.
+     *
+     * @return vita massima calcolata dalla sottoclasse
+     */
     public abstract int getVitaMassima();
 }

@@ -15,6 +15,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Canvas principale della partita.
+ * Gestisce input, ciclo di aggiornamento e delega il disegno vero e proprio a RenderGioco.
+ */
 public class VistaGioco extends Canvas {
 
     private static final double velocitaEroe = 1.45;
@@ -34,6 +38,12 @@ public class VistaGioco extends Canvas {
     private boolean fineScenarioNotificata;
     private long fineScenarioRilevataNanos;
 
+    /**
+     * Crea la vista di gioco.
+     *
+     * @param motoreGioco motore che contiene lo stato della partita
+     * @param azioneFineScenario azione da eseguire quando scenario o game over finiscono
+     */
     public VistaGioco(MotoreGioco motoreGioco, Runnable azioneFineScenario) {
         super(MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
         this.motoreGioco = motoreGioco;
@@ -43,14 +53,27 @@ public class VistaGioco extends Canvas {
         avviaCicloGioco();
     }
 
+    /**
+     * Registra un tasto premuto per permettere movimento continuo tra un frame e l'altro.
+     *
+     * @param tasto tasto premuto
+     */
     public void premi(KeyCode tasto) {
         tastiPremuti.add(tasto);
     }
 
+    /**
+     * Rimuove un tasto dall'insieme dei tasti premuti.
+     *
+     * @param tasto tasto rilasciato
+     */
     public void rilascia(KeyCode tasto) {
         tastiPremuti.remove(tasto);
     }
 
+    /**
+     * Avvia l'animazione d'attacco e chiede al motore di colpire il nemico nel raggio.
+     */
     public void attacca() {
         long adessoNanos = System.nanoTime();
         animazioniEroe.registraAttacco(adessoNanos,
@@ -62,6 +85,9 @@ public class VistaGioco extends Canvas {
         disegna();
     }
 
+    /**
+     * Ferma il ciclo grafico quando il gioco va in pausa o cambia schermata.
+     */
     public void ferma() {
         if (cicloGioco != null) {
             cicloGioco.stop();
@@ -69,18 +95,25 @@ public class VistaGioco extends Canvas {
         tastiPremuti.clear();
     }
 
+    /**
+     * Riprende il ciclo grafico se la partita e' ancora in corso.
+     */
     public void riprendi() {
         if (cicloGioco != null && motoreGioco.getFase() == FaseGioco.inGioco) {
             cicloGioco.start();
         }
     }
 
+    /**
+     * Ridisegna lo stato attuale del mondo sul canvas.
+     */
     public void disegna() {
         GraphicsContext grafica = getGraphicsContext2D();
         renderGioco.disegna(grafica, getWidth(), getHeight(), mortiRecenti,
                 animazioniEroe, fotogrammaCorrente, fineScenarioRilevataNanos);
     }
 
+    // AnimationTimer usato come game loop della schermata di gioco.
     private void avviaCicloGioco() {
         cicloGioco = new AnimationTimer() {
             @Override
@@ -97,6 +130,7 @@ public class VistaGioco extends Canvas {
         cicloGioco.start();
     }
 
+    // Avanza il contatore dei frame usato per le animazioni sprite.
     private void aggiornaFotogramma(long istante) {
         if (ultimoCambioFotogramma == 0
                 || istante - ultimoCambioFotogramma >= RenderGioco.durataFotogrammaNanos) {
@@ -105,6 +139,7 @@ public class VistaGioco extends Canvas {
         }
     }
 
+    // Traduce i tasti premuti in movimento dell'eroe e stato grafico dell'animazione.
     private void applicaMovimento() {
         double dx = 0;
         double dy = 0;
@@ -134,6 +169,7 @@ public class VistaGioco extends Canvas {
         motoreGioco.muoviEroe(dx, dy);
     }
 
+    // Attende un breve tempo prima di cambiare schermata, cosi' le animazioni finali si vedono.
     private void notificaFineScenarioSeNecessario(long istante) {
         if (fineScenarioNotificata || motoreGioco.getFase() == FaseGioco.inGioco) {
             return;
@@ -149,6 +185,7 @@ public class VistaGioco extends Canvas {
         }
     }
 
+    // Confronta i vampiri prima e dopo l'attacco per creare l'animazione di morte.
     private void registraVampiriEliminati(List<VampiroNelMondo> prima, long adessoNanos) {
         List<VampiroNelMondo> dopo = new ArrayList<VampiroNelMondo>(motoreGioco.getVampiri());
         for (VampiroNelMondo vampiroNelMondo : prima) {

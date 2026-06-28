@@ -1,5 +1,9 @@
 package it.unicam.cs.mpgc.rpg130581.interfaccia;
 
+/**
+ * Memorizza lo stato grafico dell'eroe.
+ * RenderGioco usa questi dati per scegliere animazione e direzione dello sprite.
+ */
 class AnimazioniEroe {
 
     private boolean inMovimento;
@@ -9,6 +13,7 @@ class AnimazioniEroe {
     private long attaccoInizioNanos;
     private long attaccoFineNanos;
 
+    // Aggiorna movimento e direzione, mantenendo l'ultima direzione valida quando l'eroe e' fermo.
     void aggiornaMovimento(boolean inMovimento, boolean corre, double direzioneX, double direzioneY) {
         this.inMovimento = inMovimento;
         this.corre = corre;
@@ -18,6 +23,7 @@ class AnimazioniEroe {
         }
     }
 
+    // Registra la finestra temporale in cui deve essere mostrata l'animazione d'attacco.
     void registraAttacco(long inizioNanos, long fineNanos) {
         this.attaccoInizioNanos = inizioNanos;
         this.attaccoFineNanos = fineNanos;

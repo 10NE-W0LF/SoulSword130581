@@ -10,14 +10,29 @@ import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Implementazione JSON dell'archivio partita.
+ * Scrive e legge lo stato del gioco da un file locale, creando la cartella se necessario.
+ */
 public class Salvataggi implements ArchivioPartita {
 
     private final Path percorsoSalvataggio;
 
+    /**
+     * Crea il gestore dei salvataggi.
+     *
+     * @param percorsoSalvataggio percorso del file JSON
+     */
     public Salvataggi(Path percorsoSalvataggio) {
         this.percorsoSalvataggio = percorsoSalvataggio;
     }
 
+    /**
+     * Salva lo stato della partita in formato JSON.
+     *
+     * @param stato stato da salvare
+     * @throws IOException se la scrittura del file fallisce
+     */
     @Override
     public void salva(StatoPartita stato) throws IOException {
         if (percorsoSalvataggio.getParent() != null) {
@@ -44,6 +59,12 @@ public class Salvataggi implements ArchivioPartita {
         Files.write(percorsoSalvataggio, contenutoJson.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Carica lo stato dal file JSON.
+     *
+     * @return stato caricato o nuova partita se il file non esiste
+     * @throws IOException se la lettura del file fallisce
+     */
     @Override
     public StatoPartita carica() throws IOException {
         if (!Files.exists(percorsoSalvataggio)) {
@@ -78,11 +99,13 @@ public class Salvataggi implements ArchivioPartita {
         );
     }
 
+    // Cerca una chiave numerica nel JSON e usa un valore predefinito se non viene trovata.
     private int leggiIntero(String contenutoJson, String chiave, int valorePredefinito) {
         Matcher corrispondenza = Pattern.compile("\"" + chiave + "\"\\s*:\\s*(\\d+)").matcher(contenutoJson);
         return corrispondenza.find() ? Integer.parseInt(corrispondenza.group(1)) : valorePredefinito;
     }
 
+    // Cerca una chiave booleana nel JSON e usa un valore predefinito se non viene trovata.
     private boolean leggiBooleano(String contenutoJson, String chiave, boolean valorePredefinito) {
         Matcher corrispondenza = Pattern.compile("\"" + chiave + "\"\\s*:\\s*(true|false)").matcher(contenutoJson);
         return corrispondenza.find() ? Boolean.parseBoolean(corrispondenza.group(1)) : valorePredefinito;

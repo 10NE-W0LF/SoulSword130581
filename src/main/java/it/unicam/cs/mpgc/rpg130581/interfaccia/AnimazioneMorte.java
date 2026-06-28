@@ -3,6 +3,10 @@ package it.unicam.cs.mpgc.rpg130581.interfaccia;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.Vampiro;
 import it.unicam.cs.mpgc.rpg130581.motore.Posizione;
 
+/**
+ * Dati necessari per disegnare l'animazione di morte di un vampiro appena eliminato.
+ * La posizione viene copiata per non dipendere piu' dall'oggetto rimosso dal mondo.
+ */
 class AnimazioneMorte {
 
     private final Vampiro vampiro;

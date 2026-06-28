@@ -25,6 +25,10 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+/**
+ * Applicazione JavaFX principale.
+ * Costruisce i menu, collega gli input alla vista di gioco e gestisce i cambi di schermata.
+ */
 public class AppSoulSword extends Application {
 
     private static MotoreGioco motoreGioco;
@@ -32,10 +36,20 @@ public class AppSoulSword extends Application {
     private Stage finestra;
     private final ArchivioSprite archivioSprite = new ArchivioSprite();
 
+    /**
+     * Collega il motore di gioco alla GUI prima dell'avvio JavaFX.
+     *
+     * @param nuovoMotoreGioco motore da usare nell'applicazione
+     */
     public static void setMotoreGioco(MotoreGioco nuovoMotoreGioco) {
         motoreGioco = nuovoMotoreGioco;
     }
 
+    /**
+     * Configura la finestra principale e mostra il menu iniziale.
+     *
+     * @param finestra stage principale JavaFX
+     */
     @Override
     public void start(Stage finestra) {
         if (motoreGioco == null) {
@@ -50,6 +64,7 @@ public class AppSoulSword extends Application {
         finestra.show();
     }
 
+    // Schermata iniziale con nuova partita, caricamento e uscita.
     private void mostraMenuPrincipale() {
         Text titolo = testo("SoulSword", 58, FontWeight.EXTRA_BOLD);
         titolo.setFill(Color.rgb(210, 238, 255));
@@ -74,6 +89,10 @@ public class AppSoulSword extends Application {
         impostaScena(schermataConSfondo(pannello));
     }
 
+    /*
+    Menu di selezione scenario.
+    Mostra stato dell'eroe, evoluzione della SoulSword e pulsanti per assegnare stats.
+     */
     private void mostraMenuScenari() {
         Eroe eroe = motoreGioco.getStato().getEroe();
 
@@ -159,6 +178,7 @@ public class AppSoulSword extends Application {
         impostaScena(schermataConSfondo(contenuto));
     }
 
+    // Crea la scena di gioco e collega i tasti principali alle azioni del motore.
     private void mostraGioco(ScenarioGioco scenario) {
         if (!motoreGioco.avviaScenario(scenario)) {
             mostraMenuScenari();
@@ -190,6 +210,7 @@ public class AppSoulSword extends Application {
         vistaGioco.requestFocus();
     }
 
+    // Overlay di pausa, usato senza distruggere la vista di gioco sottostante.
     private void mostraPausa(StackPane radice, VistaGioco vistaGioco, boolean[] pausaAperta) {
         vistaGioco.ferma();
 
@@ -223,6 +244,7 @@ public class AppSoulSword extends Application {
         radice.getChildren().add(overlay);
     }
 
+    // Schermata finale mostrata dopo vittoria o sconfitta dello scenario.
     private void mostraSchermataEsito() {
         boolean vittoria = motoreGioco.getFase() == FaseGioco.vittoria;
         ScenarioGioco scenarioConcluso = motoreGioco.getScenarioCorrente();
@@ -270,6 +292,7 @@ public class AppSoulSword extends Application {
         impostaScena(schermataConSfondo(pannello));
     }
 
+    // Crea una schermata con immagine di sfondo e ombra, poi sovrappone il contenuto passato.
     private StackPane schermataConSfondo(Parent contenuto) {
         StackPane radice = new StackPane();
         Image immagine = archivioSprite.iconaSoulSword();
@@ -286,6 +309,7 @@ public class AppSoulSword extends Application {
         return radice;
     }
 
+    // Contenitore comune dei menu; lo sfondo resta trasparente per non coprire l'immagine.
     private VBox pannelloMenu() {
         VBox pannello = new VBox(18);
         pannello.setAlignment(Pos.CENTER);
@@ -295,6 +319,7 @@ public class AppSoulSword extends Application {
         return pannello;
     }
 
+    // Crea un pulsante coerente con lo stile gotico del menu.
     private Button bottone(String testo) {
         Button bottone = new Button(testo);
         bottone.setMinWidth(250);
@@ -306,6 +331,7 @@ public class AppSoulSword extends Application {
         return bottone;
     }
 
+    // Pulsante compatto usato per assegnare punti alle statistiche dell'eroe.
     private Button bottoneStatistica(String testo) {
         Button bottone = new Button(testo);
         bottone.setMinWidth(96);
@@ -317,6 +343,7 @@ public class AppSoulSword extends Application {
         return bottone;
     }
 
+    // Colore testuale associato all'evoluzione corrente della SoulSword.
     private Color coloreSoulSword(EvoSoulSword evoluzione) {
         if (evoluzione == EvoSoulSword.lamaDiSangue) {
             return Color.rgb(176, 96, 255);

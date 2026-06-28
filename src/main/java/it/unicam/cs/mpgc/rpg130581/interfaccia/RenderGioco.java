@@ -15,6 +15,10 @@ import javafx.scene.text.FontWeight;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Renderer della partita.
+ * Disegna sfondo, personaggi, animazioni, HUD e consumabili senza modificare la logica del motore.
+ */
 class RenderGioco {
 
     static final int dimensioneEntita = 72;
@@ -34,6 +38,7 @@ class RenderGioco {
         this.archivioSprite = archivioSprite;
     }
 
+    // Disegna un frame completo: mondo con camera, entita' e interfaccia fissa.
     void disegna(GraphicsContext grafica, double larghezzaCanvas, double altezzaCanvas,
                  List<AnimazioneMorte> mortiRecenti, AnimazioniEroe animazioniEroe,
                  int fotogrammaCorrente, long fineScenarioRilevataNanos) {
@@ -80,6 +85,7 @@ class RenderGioco {
         return Math.max(minimo, Math.min(massimo, valore));
     }
 
+    // Disegna lo scenario corrente usando lo sfondo configurato nell'archivio sprite.
     private void disegnaSfondo(GraphicsContext grafica) {
         Image sfondo = archivioSprite.sfondo(motoreGioco.getScenarioCorrente());
         if (sfondo != null && !sfondo.isError()) {
@@ -93,6 +99,7 @@ class RenderGioco {
         grafica.fillRect(0, 0, MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
     }
 
+    // Disegna tutti i vampiri attivi con barra vita e nome.
     private void disegnaVampiri(GraphicsContext grafica, int fotogrammaCorrente) {
         long adessoMillis = System.currentTimeMillis();
         for (VampiroNelMondo vampiroNelMondo : motoreGioco.getVampiri()) {
@@ -112,6 +119,7 @@ class RenderGioco {
         }
     }
 
+    // Sceglie l'animazione del vampiro in base ad attacco, danno subito o movimento.
     private TipoAnimazione animazioneVampiro(VampiroNelMondo vampiroNelMondo, long adessoMillis) {
         if (adessoMillis - vampiroNelMondo.getUltimoDannoMillis() <= durataHurtMillis) {
             return TipoAnimazione.hurt;
@@ -122,6 +130,7 @@ class RenderGioco {
         return TipoAnimazione.walk;
     }
 
+    // Disegna le animazioni di morte dei vampiri appena rimossi dal mondo.
     private void disegnaMorteVampiri(GraphicsContext grafica, List<AnimazioneMorte> mortiRecenti) {
         long adessoNanos = System.nanoTime();
         Iterator<AnimazioneMorte> iterator = mortiRecenti.iterator();
@@ -137,6 +146,7 @@ class RenderGioco {
         }
     }
 
+    // Disegna l'eroe usando lo sprite corrispondente all'evoluzione della SoulSword.
     private void disegnaEroe(GraphicsContext grafica, AnimazioniEroe animazioniEroe,
                              int fotogrammaCorrente, long fineScenarioRilevataNanos) {
         Eroe eroe = motoreGioco.getStato().getEroe();
@@ -152,6 +162,7 @@ class RenderGioco {
                 dimensioneEntita, dimensioneEntita, riga, indice, ciclica);
     }
 
+    // Sceglie l'animazione dell'eroe in base a fase, danno, attacco e movimento.
     private TipoAnimazione animazioneEroe(AnimazioniEroe animazioniEroe) {
         long adessoMillis = System.currentTimeMillis();
         long adessoNanos = System.nanoTime();
@@ -176,6 +187,7 @@ class RenderGioco {
         return TipoAnimazione.idle;
     }
 
+    // Calcola il fotogramma corretto per animazioni cicliche e animazioni singole.
     private int indiceFotogrammaEroe(Image foglio, TipoAnimazione animazione, long attaccoInizioNanos,
                                      long fineScenarioRilevataNanos, int fotogrammaCorrente) {
         if (animazione == TipoAnimazione.attack || animazione == TipoAnimazione.walkAttack
@@ -189,6 +201,7 @@ class RenderGioco {
         return fotogrammaCorrente;
     }
 
+    // Ritaglia il frame corretto dallo sprite sheet e lo disegna nella posizione richiesta.
     private void disegnaFotogramma(GraphicsContext grafica, Image foglioSprite,
                                    double x, double y, int larghezza, int altezza,
                                    int riga, int indiceFotogramma, boolean ciclica) {
@@ -211,6 +224,7 @@ class RenderGioco {
                 x, y, larghezza, altezza);
     }
 
+    // Avanza una animazione non ciclica fermandosi sull'ultimo frame disponibile.
     private int indiceAnimazioneUnaVolta(Image foglio, long inizioNanos, long adessoNanos) {
         if (inizioNanos <= 0) {
             return 0;
@@ -231,6 +245,7 @@ class RenderGioco {
         return Math.max(1, (int) Math.round(foglio.getWidth() / dimensioneFotogramma));
     }
 
+    // Disegna HUD superiore con vita, esperienza, scenario, nemici e messaggi base.
     private void disegnaInterfaccia(GraphicsContext grafica) {
         Eroe eroe = motoreGioco.getStato().getEroe();
         grafica.setFill(Color.rgb(14, 17, 18, 0.82));
@@ -254,6 +269,7 @@ class RenderGioco {
         disegnaPozioneCura(grafica, eroe);
     }
 
+    // Slot fisso della pozione cura in basso a destra.
     private void disegnaPozioneCura(GraphicsContext grafica, Eroe eroe) {
         double lato = 62;
         double x = MotoreGioco.larghezzaMondo - lato - 24;
@@ -275,6 +291,7 @@ class RenderGioco {
         grafica.fillText("x" + eroe.getPozioniCura(), x + 38, y + 55);
     }
 
+    // Barra riutilizzata per vita ed esperienza.
     private void disegnaBarra(GraphicsContext grafica, double x, double y, double larghezza,
                               int valore, int massimo, Color colore) {
         int altezza = 12;

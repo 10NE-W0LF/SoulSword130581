@@ -2,6 +2,10 @@ package it.unicam.cs.mpgc.rpg130581.motore;
 
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.Vampiro;
 
+/**
+ * Associa un vampiro del modello alla sua posizione e al suo stato grafico nel mondo.
+ * Serve al motore per movimento, inseguimento, attacco e animazioni.
+ */
 public class VampiroNelMondo {
 
     private final Vampiro vampiro;
@@ -24,6 +28,7 @@ public class VampiroNelMondo {
         return posizione;
     }
 
+    // Memorizza l'ultima direzione utile per scegliere la riga corretta dello sprite.
     public void registraMovimento(double dx, double dy) {
         if (Math.abs(dx) > 0.001 || Math.abs(dy) > 0.001) {
             ultimoDx = dx;

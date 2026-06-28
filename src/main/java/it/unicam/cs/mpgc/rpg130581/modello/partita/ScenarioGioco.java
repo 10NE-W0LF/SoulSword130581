@@ -3,6 +3,10 @@ package it.unicam.cs.mpgc.rpg130581.modello.partita;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Elenco degli scenari giocabili.
+ * Ogni scenario definisce sfondo, numero di nemici, difficolta' e presenza del boss.
+ */
 public enum ScenarioGioco {
     margineForestaMorta(1, "Dead Forest", "/sfondi/dead_forest.png", 8, 3, 1, 3, 0, 0, 0.0, false),
     profonditaForestaMorta(2, "Deep Dead Forest", "/sfondi/dead_forest.png", 12, 4, 3, 6, 0, 0, 0.0, false),
@@ -40,6 +44,12 @@ public enum ScenarioGioco {
         this.scenarioBoss = scenarioBoss;
     }
 
+    /**
+     * Cerca uno scenario tramite il suo numero progressivo.
+     *
+     * @param numero numero dello scenario
+     * @return scenario corrispondente o primo scenario se il numero non e' valido
+     */
     public static ScenarioGioco daNumero(int numero) {
         for (ScenarioGioco scenario : values()) {
             if (scenario.numero == numero) {
@@ -49,16 +59,17 @@ public enum ScenarioGioco {
         return margineForestaMorta;
     }
 
+    /**
+     * Restituisce lo scenario successivo.
+     *
+     * @return scenario successivo o scenario corrente se si e' gia' all'ultimo
+     */
     public ScenarioGioco successivo() {
         int indice = scenariOrdinati.indexOf(this);
         if (indice < 0 || indice == scenariOrdinati.size() - 1) {
             return this;
         }
         return scenariOrdinati.get(indice + 1);
-    }
-
-    public boolean isUltimoScenario() {
-        return this == salaDelTrono;
     }
 
     public int getNumero() {
