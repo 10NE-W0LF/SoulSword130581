@@ -250,7 +250,7 @@ class RenderGioco {
                 + eroe.getEvoSoulSword().getNomeVisualizzato(), 236, 67);
         grafica.fillText("Nemici: " + motoreGioco.getStato().getSconfittiNelloScenario()
                 + "/" + motoreGioco.getScenarioCorrente().getNemiciRegolari(), 236, 91);
-        grafica.fillText("WASD/Frecce: muovi | SHIFT: corsa | SPAZIO: attacca | T: pozione | ESC: pausa", 28, 108);
+        grafica.fillText("WASD/Frecce: muovi | SHIFT: corsa | SPAZIO: attacca | ESC: pausa", 28, 108);
         disegnaPozioneCura(grafica, eroe);
     }
 
