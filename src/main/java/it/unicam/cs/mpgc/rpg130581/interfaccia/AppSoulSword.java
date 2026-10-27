@@ -6,15 +6,20 @@ import it.unicam.cs.mpgc.rpg130581.modello.personaggi.Eroe;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.EvoSoulSword;
 import it.unicam.cs.mpgc.rpg130581.motore.MotoreGioco;
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.NumberBinding;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -34,6 +39,7 @@ public class AppSoulSword extends Application {
     private static MotoreGioco motoreGioco;
 
     private Stage finestra;
+    private boolean tastoSchermoInteroPremuto;
     private final ArchivioSprite archivioSprite = new ArchivioSprite();
 
     /**
@@ -60,6 +66,13 @@ public class AppSoulSword extends Application {
         finestra.setTitle("SoulSword");
         finestra.getIcons().add(archivioSprite.iconaSoulSword());
         finestra.setResizable(false);
+        finestra.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+        finestra.setFullScreenExitHint("");
+        finestra.focusedProperty().addListener((proprieta, prima, adesso) -> {
+            if (!adesso) {
+                tastoSchermoInteroPremuto = false;
+            }
+        });
         mostraMenuPrincipale();
         finestra.show();
     }
@@ -85,7 +98,8 @@ public class AppSoulSword extends Application {
         esci.setOnAction(ignored -> finestra.close());
 
         VBox pannello = pannelloMenu();
-        pannello.getChildren().addAll(titolo, sottotitolo, nuovaPartita, caricaPartita, esci);
+        pannello.getChildren().addAll(titolo, sottotitolo, nuovaPartita, caricaPartita,
+                bottoneSchermoIntero(), esci);
         impostaScena(schermataConSfondo(pannello));
     }
 
@@ -187,7 +201,7 @@ public class AppSoulSword extends Application {
 
         VistaGioco vistaGioco = new VistaGioco(motoreGioco, this::mostraSchermataEsito);
         StackPane radice = new StackPane(vistaGioco);
-        Scene scena = new Scene(radice, MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
+        Scene scena = impostaScena(radice);
         final boolean[] pausaAperta = {false};
         scena.setOnKeyPressed(evento -> {
             if (pausaAperta[0]) {
@@ -206,7 +220,6 @@ public class AppSoulSword extends Application {
             }
         });
         scena.setOnKeyReleased(evento -> vistaGioco.rilascia(evento.getCode()));
-        finestra.setScene(scena);
         vistaGioco.requestFocus();
     }
 
@@ -331,6 +344,18 @@ public class AppSoulSword extends Application {
         return bottone;
     }
 
+    private Button bottoneSchermoIntero() {
+        Button bottone = bottone("");
+        bottone.textProperty().bind(Bindings.when(finestra.fullScreenProperty())
+                .then("Modalita' finestra").otherwise("Schermo intero"));
+        bottone.setOnAction(ignored -> alternaSchermoIntero());
+        return bottone;
+    }
+
+    private void alternaSchermoIntero() {
+        finestra.setFullScreen(!finestra.isFullScreen());
+    }
+
     // Pulsante compatto usato per assegnare punti alle statistiche dell'eroe.
     private Button bottoneStatistica(String testo) {
         Button bottone = new Button(testo);
@@ -361,8 +386,44 @@ public class AppSoulSword extends Application {
         return testo;
     }
 
-    private void impostaScena(Parent radice) {
-        Scene scena = new Scene(radice, MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
-        finestra.setScene(scena);
+    private Scene impostaScena(StackPane radice) {
+        radice.setMinSize(MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
+        radice.setPrefSize(MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
+        radice.setMaxSize(MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
+
+        // Il Group permette di centrare il contenuto usando le dimensioni gia' scalate.
+        StackPane contenitore = new StackPane(new Group(radice));
+        contenitore.setStyle("-fx-background-color: black;");
+        NumberBinding scala = Bindings.min(
+                contenitore.widthProperty().divide(MotoreGioco.larghezzaMondo),
+                contenitore.heightProperty().divide(MotoreGioco.altezzaMondo));
+        radice.scaleXProperty().bind(scala);
+        radice.scaleYProperty().bind(scala);
+
+        Scene scena = finestra.getScene();
+        if (scena == null) {
+            scena = new Scene(contenitore, MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
+            scena.addEventFilter(KeyEvent.KEY_PRESSED, evento -> {
+                if (evento.getCode() == KeyCode.F11) {
+                    if (!tastoSchermoInteroPremuto) {
+                        tastoSchermoInteroPremuto = true;
+                        alternaSchermoIntero();
+                    }
+                    evento.consume();
+                }
+            });
+            scena.addEventFilter(KeyEvent.KEY_RELEASED, evento -> {
+                if (evento.getCode() == KeyCode.F11) {
+                    tastoSchermoInteroPremuto = false;
+                    evento.consume();
+                }
+            });
+            finestra.setScene(scena);
+        } else {
+            scena.setOnKeyPressed(null);
+            scena.setOnKeyReleased(null);
+            scena.setRoot(contenitore);
+        }
+        return scena;
     }
 }

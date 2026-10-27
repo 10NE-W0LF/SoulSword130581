@@ -111,8 +111,14 @@ Tutte le sprite usate in questo gioco sono state prese da questo sito https://cr
 - **Spazio** per attaccare.
 - **T** per usare una Pozione Cura.
 - **ESC** per mettere in pausa.
+- **F11** per passare da finestra a schermo intero e viceversa, in tutte le schermate.
+- **Schermo intero / Modalita' finestra** disponibile solo nel menu principale.
 - **Salva** per salvare la partita dal menu di selezione scenario.
 - **Carica partita** per caricare un salvataggio dal menu principale.
+
+La modalita' schermo intero mantiene le proporzioni di gioco e menu, con eventuali
+bande nere sui monitor con proporzioni diverse. Rimane attiva durante i cambi di
+schermata; **ESC** continua ad aprire la pausa anche a schermo intero.
 
 ## Struttura del progetto
 
