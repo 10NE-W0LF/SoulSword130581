@@ -8,6 +8,10 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(25)
@@ -27,3 +31,28 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
+// Su Windows gli output possono ricevere l'attributo DOS di sola lettura.
+// Va tolto prima che Gradle pulisca i risultati precedenti, quindi prima dei task.
+if (System.getProperty('os.name').startsWith('Windows')) {
+    def outputDirectory = layout.buildDirectory.get().asFile
+    if (outputDirectory.isDirectory()) {
+        java.nio.file.Files.setAttribute(outputDirectory.toPath(), 'dos:readonly', false)
+        outputDirectory.eachFileRecurse { generatedFile ->
+            java.nio.file.Files.setAttribute(generatedFile.toPath(), 'dos:readonly', false)
+        }
+    }
+}
+
+tasks.named('test', Test) {
+    exclude '**/ApplicazioneInterfacciaTest.class'
+}
+
+tasks.register('testInterfaccia', Test) {
+    description = 'Verifica la GUI JavaFX; richiede una sessione grafica disponibile.'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    include '**/ApplicazioneInterfacciaTest.class'
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
+    shouldRunAfter tasks.named('test')
+}

@@ -1,10 +1,12 @@
 package it.unicam.cs.mpgc.rpg130581.interfaccia;
 
 import it.unicam.cs.mpgc.rpg130581.modello.partita.FaseGioco;
+import it.unicam.cs.mpgc.rpg130581.modello.impostazioni.Lingua;
 import it.unicam.cs.mpgc.rpg130581.modello.partita.ScenarioGioco;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.Eroe;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.EvoSoulSword;
 import it.unicam.cs.mpgc.rpg130581.motore.MotoreGioco;
+import it.unicam.cs.mpgc.rpg130581.persistenza.ArchivioPreferenze;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.NumberBinding;
@@ -30,6 +32,8 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+
 /**
  * Applicazione JavaFX principale.
  * Costruisce i menu, collega gli input alla vista di gioco e gestisce i cambi di schermata.
@@ -37,10 +41,13 @@ import javafx.stage.Stage;
 public class AppSoulSword extends Application {
 
     private static MotoreGioco motoreGioco;
+    private static ArchivioPreferenze archivioPreferenze;
 
     private Stage finestra;
     private boolean tastoSchermoInteroPremuto;
     private final ArchivioSprite archivioSprite = new ArchivioSprite();
+    private final TestiInterfaccia testi = new TestiInterfaccia();
+    private boolean erroreLetturaPreferenze;
 
     /**
      * Collega il motore di gioco alla GUI prima dell'avvio JavaFX.
@@ -49,6 +56,11 @@ public class AppSoulSword extends Application {
      */
     public static void setMotoreGioco(MotoreGioco nuovoMotoreGioco) {
         motoreGioco = nuovoMotoreGioco;
+    }
+
+    /** Collega l'archivio delle preferenze senza dipendere dal formato del file. */
+    public static void setArchivioPreferenze(ArchivioPreferenze nuovoArchivioPreferenze) {
+        archivioPreferenze = nuovoArchivioPreferenze;
     }
 
     /**
@@ -60,6 +72,14 @@ public class AppSoulSword extends Application {
     public void start(Stage finestra) {
         if (motoreGioco == null) {
             throw new IllegalStateException("MotoreGioco non inizializzato.");
+        }
+        if (archivioPreferenze == null) {
+            throw new IllegalStateException("ArchivioPreferenze non inizializzato.");
+        }
+        try {
+            testi.impostaLingua(archivioPreferenze.caricaLingua());
+        } catch (IOException exception) {
+            erroreLetturaPreferenze = true;
         }
 
         this.finestra = finestra;
@@ -81,11 +101,14 @@ public class AppSoulSword extends Application {
     private void mostraMenuPrincipale() {
         Text titolo = testo("SoulSword", 58, FontWeight.EXTRA_BOLD);
         titolo.setFill(Color.rgb(210, 238, 255));
-        Text sottotitolo = testo("La caccia dei vampiri inizia dalla tua lama.", 18, FontWeight.NORMAL);
+        Text sottotitolo = testo(testi.testo("menu.sottotitolo"), 18, FontWeight.NORMAL);
 
-        Button nuovaPartita = bottone("Nuova partita");
-        Button caricaPartita = bottone("Carica partita");
-        Button esci = bottone("Esci");
+        Button nuovaPartita = bottone(testi.testo("menu.nuovaPartita"));
+        Button caricaPartita = bottone(testi.testo("menu.caricaPartita"));
+        Button esci = bottone(testi.testo("menu.esci"));
+
+        Button lingua = bottone(testi.testo("menu.lingua"));
+        lingua.setOnAction(ignored -> mostraMenuLingua());
 
         nuovaPartita.setOnAction(ignored -> {
             motoreGioco.nuovaPartita();
@@ -99,8 +122,29 @@ public class AppSoulSword extends Application {
 
         VBox pannello = pannelloMenu();
         pannello.getChildren().addAll(titolo, sottotitolo, nuovaPartita, caricaPartita,
-                bottoneSchermoIntero(), esci);
+                bottoneSchermoIntero(), lingua, esci);
+        if (erroreLetturaPreferenze) {
+            pannello.getChildren().add(testo(testi.testo("preferenze.erroreLettura"), 14, FontWeight.NORMAL));
+        }
         impostaScena(schermataConSfondo(pannello));
+    }
+
+    private void mostraMenuLingua() {
+        MenuLingua menu = new MenuLingua(testi, this::salvaLinguaDalMenu, this::mostraMenuPrincipale);
+        impostaScena(schermataConSfondo(menu));
+    }
+
+    // La scelta viene applicata solo dopo la conferma e la scrittura delle preferenze.
+    private boolean salvaLinguaDalMenu(Lingua lingua) {
+        try {
+            archivioPreferenze.salvaLingua(lingua);
+            testi.impostaLingua(lingua);
+            erroreLetturaPreferenze = false;
+            mostraMenuPrincipale();
+            return true;
+        } catch (IOException exception) {
+            return false;
+        }
     }
 
     /*
@@ -117,22 +161,22 @@ public class AppSoulSword extends Application {
         immagineEroe.setPreserveRatio(true);
         immagineEroe.setSmooth(false);
 
-        Text titolo = testo("Selezione scenario", 36, FontWeight.EXTRA_BOLD);
+        Text titolo = testo(testi.testo("scenari.titolo"), 36, FontWeight.EXTRA_BOLD);
         Text nomeEroe = testo(eroe.getNome(), 18, FontWeight.BOLD);
-        Text livelloEroe = testo("Livello " + eroe.getLivello(), 18, FontWeight.BOLD);
-        Text soulSword = testo(eroe.getEvoSoulSword().getNomeVisualizzato(), 18, FontWeight.BOLD);
+        Text livelloEroe = testo(testi.testo("eroe.livello", eroe.getLivello()), 18, FontWeight.BOLD);
+        Text soulSword = testo(testi.nome(eroe.getEvoSoulSword()), 18, FontWeight.BOLD);
         Color coloreEvoluzione = coloreSoulSword(eroe.getEvoSoulSword());
         nomeEroe.setFill(Color.rgb(80, 170, 255));
         livelloEroe.setFill(coloreEvoluzione);
         soulSword.setFill(coloreEvoluzione);
 
-        Text stats = testo("Punti stats: " + eroe.getStats(), 15, FontWeight.BOLD);
-        Text forza = testo("Forza: " + eroe.getForza()
-                + "  (Danno +" + eroe.getForza() * Eroe.bonusForza + ")", 14, FontWeight.NORMAL);
-        Text salute = testo("Salute: " + eroe.getSalute()
-                + "  (Vita +" + eroe.getSalute() * Eroe.bonusSalute + ")", 14, FontWeight.NORMAL);
+        Text stats = testo(testi.testo("eroe.stats", eroe.getStats()), 15, FontWeight.BOLD);
+        Text forza = testo(testi.testo("eroe.forza", eroe.getForza(),
+                eroe.getForza() * Eroe.bonusForza), 14, FontWeight.NORMAL);
+        Text salute = testo(testi.testo("eroe.salute", eroe.getSalute(),
+                eroe.getSalute() * Eroe.bonusSalute), 14, FontWeight.NORMAL);
 
-        Button aumentaForza = bottoneStatistica("Forza +");
+        Button aumentaForza = bottoneStatistica(testi.testo("eroe.aumentaForza"));
         aumentaForza.setDisable(eroe.getStats() <= 0);
         aumentaForza.setOnAction(ignored -> {
             if (eroe.aumentaForza()) {
@@ -140,7 +184,7 @@ public class AppSoulSword extends Application {
             }
         });
 
-        Button aumentaSalute = bottoneStatistica("Salute +");
+        Button aumentaSalute = bottoneStatistica(testi.testo("eroe.aumentaSalute"));
         aumentaSalute.setDisable(eroe.getStats() <= 0);
         aumentaSalute.setOnAction(ignored -> {
             if (eroe.aumentaSalute()) {
@@ -163,9 +207,9 @@ public class AppSoulSword extends Application {
         for (ScenarioGioco scenario : ScenarioGioco.values()) {
             boolean scenarioSbloccato = motoreGioco.getStato().isScenarioSbloccato(scenario);
             Button bottoneScenario = bottone(scenario.getNumero() + "  " + scenario.getNomeVisualizzato()
-                    + "   | Nemici: " + scenario.getNemiciRegolari()
-                    + (scenario.isScenarioBoss() ? "   | Boss" : "")
-                    + (scenarioSbloccato ? "" : "   | Bloccato"));
+                    + "   | " + testi.testo("scenari.nemici", scenario.getNemiciRegolari())
+                    + (scenario.isScenarioBoss() ? "   | " + testi.testo("scenari.boss") : "")
+                    + (scenarioSbloccato ? "" : "   | " + testi.testo("scenari.bloccato")));
             bottoneScenario.setMaxWidth(Double.MAX_VALUE);
             bottoneScenario.setDisable(!scenarioSbloccato);
             bottoneScenario.setOnAction(ignored -> {
@@ -176,12 +220,13 @@ public class AppSoulSword extends Application {
             listaScenari.getChildren().add(bottoneScenario);
         }
 
-        Button tornaMenu = bottone("Menu principale");
+        Button tornaMenu = bottone(testi.testo("menu.principale"));
         tornaMenu.setOnAction(ignored -> mostraMenuPrincipale());
-        Button salva = bottone("Salva");
-        salva.setOnAction(ignored -> motoreGioco.salva());
+        Button salva = bottone(testi.testo("scenari.salva"));
+        Text messaggioSalvataggio = testo("", 14, FontWeight.NORMAL);
+        salva.setOnAction(ignored -> messaggioSalvataggio.setText(testi.testo(salvaPartitaEPreferenze())));
 
-        VBox destra = new VBox(16, titolo, listaScenari, salva, tornaMenu);
+        VBox destra = new VBox(16, titolo, listaScenari, salva, messaggioSalvataggio, tornaMenu);
         destra.setAlignment(Pos.CENTER_LEFT);
         destra.setPadding(new Insets(28));
         destra.setStyle("-fx-background-color: rgba(8, 10, 16, 0.72); -fx-background-radius: 14;");
@@ -199,7 +244,7 @@ public class AppSoulSword extends Application {
             return;
         }
 
-        VistaGioco vistaGioco = new VistaGioco(motoreGioco, this::mostraSchermataEsito);
+        VistaGioco vistaGioco = new VistaGioco(motoreGioco, this::mostraSchermataEsito, testi);
         StackPane radice = new StackPane(vistaGioco);
         Scene scena = impostaScena(radice);
         final boolean[] pausaAperta = {false};
@@ -227,12 +272,12 @@ public class AppSoulSword extends Application {
     private void mostraPausa(StackPane radice, VistaGioco vistaGioco, boolean[] pausaAperta) {
         vistaGioco.ferma();
 
-        Text titolo = testo("PAUSA", 48, FontWeight.EXTRA_BOLD);
+        Text titolo = testo(testi.testo("pausa.titolo"), 48, FontWeight.EXTRA_BOLD);
         titolo.setFill(Color.rgb(210, 238, 255));
-        Text nota = testo("I progressi dello scenario vengono salvati solo in caso di vittoria.", 15, FontWeight.NORMAL);
+        Text nota = testo(testi.testo("pausa.nota"), 15, FontWeight.NORMAL);
 
-        Button gioca = bottone("Continua");
-        Button selezioneScenario = bottone("Scenari");
+        Button gioca = bottone(testi.testo("pausa.continua"));
+        Button selezioneScenario = bottone(testi.testo("scenari.elenco"));
 
         VBox pannello = pannelloMenu();
         pannello.getChildren().addAll(titolo, nota, gioca, selezioneScenario);
@@ -261,23 +306,22 @@ public class AppSoulSword extends Application {
     private void mostraSchermataEsito() {
         boolean vittoria = motoreGioco.getFase() == FaseGioco.vittoria;
         ScenarioGioco scenarioConcluso = motoreGioco.getScenarioCorrente();
-        String messaggioFinale = motoreGioco.getUltimoMessaggio();
-        if (vittoria) {
-            motoreGioco.salva();
-        }
+        String messaggioFinale = testi.messaggioEsito(vittoria, scenarioConcluso);
+        String esitoSalvataggio = vittoria ? salvaPartitaEPreferenze() : null;
 
-        Text titolo = testo(vittoria ? "Vittoria" : "Sconfitta", 56, FontWeight.EXTRA_BOLD);
+        Text titolo = testo(testi.testo(vittoria ? "esito.titoloVittoria" : "esito.titoloSconfitta"),
+                56, FontWeight.EXTRA_BOLD);
         titolo.setFill(vittoria ? Color.rgb(80, 220, 255) : Color.rgb(255, 70, 82));
         Text messaggio = testo(messaggioFinale, 18, FontWeight.NORMAL);
 
-        Button restart = bottone("Riprova");
+        Button restart = bottone(testi.testo("esito.riprova"));
         restart.setOnAction(ignored -> {
             if (!vittoria) {
                 motoreGioco.annullaScenarioSenzaProgressi();
             }
             mostraGioco(scenarioConcluso);
         });
-        Button selezioneScenario = bottone("Scenari");
+        Button selezioneScenario = bottone(testi.testo("scenari.elenco"));
         selezioneScenario.setOnAction(ignored -> {
             if (vittoria) {
                 motoreGioco.confermaVittoriaScenario();
@@ -286,7 +330,7 @@ public class AppSoulSword extends Application {
             }
             mostraMenuScenari();
         });
-        Button menuPrincipale = bottone("Menu principale");
+        Button menuPrincipale = bottone(testi.testo("menu.principale"));
         menuPrincipale.setOnAction(ignored -> {
             if (vittoria) {
                 motoreGioco.confermaVittoriaScenario();
@@ -298,11 +342,28 @@ public class AppSoulSword extends Application {
 
         VBox pannello = pannelloMenu();
         pannello.getChildren().addAll(titolo, messaggio);
+        if (vittoria && !"salvataggio.riuscito".equals(esitoSalvataggio)) {
+            pannello.getChildren().add(testo(testi.testo(esitoSalvataggio), 14, FontWeight.NORMAL));
+        }
         if (!vittoria) {
             pannello.getChildren().add(restart);
         }
         pannello.getChildren().addAll(selezioneScenario, menuPrincipale);
         impostaScena(schermataConSfondo(pannello));
+    }
+
+    // Ricorda la lingua solo dopo un salvataggio riuscito, anche alla vittoria automatica.
+    private String salvaPartitaEPreferenze() {
+        if (!motoreGioco.salva()) {
+            return "salvataggio.fallito";
+        }
+        try {
+            archivioPreferenze.salvaLingua(testi.getLingua());
+            erroreLetturaPreferenze = false;
+            return "salvataggio.riuscito";
+        } catch (IOException exception) {
+            return "preferenze.erroreSalvataggio";
+        }
     }
 
     // Crea una schermata con immagine di sfondo e ombra, poi sovrappone il contenuto passato.
@@ -347,7 +408,7 @@ public class AppSoulSword extends Application {
     private Button bottoneSchermoIntero() {
         Button bottone = bottone("");
         bottone.textProperty().bind(Bindings.when(finestra.fullScreenProperty())
-                .then("Modalita' finestra").otherwise("Schermo intero"));
+                .then(testi.testo("menu.finestra")).otherwise(testi.testo("menu.schermoIntero")));
         bottone.setOnAction(ignored -> alternaSchermoIntero());
         return bottone;
     }

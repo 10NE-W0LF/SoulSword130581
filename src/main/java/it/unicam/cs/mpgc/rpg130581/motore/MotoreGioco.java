@@ -199,13 +199,17 @@ public class MotoreGioco {
 
     /**
      * Salva la partita corrente tramite l'archivio configurato.
+     *
+     * @return true se il salvataggio e' riuscito
      */
-    public void salva() {
+    public boolean salva() {
         try {
             archivioPartita.salva(stato);
             ultimoMessaggio = "Partita salvata.";
+            return true;
         } catch (IOException exception) {
             ultimoMessaggio = "Salvataggio fallito: " + exception.getMessage();
+            return false;
         }
     }
 

@@ -45,10 +45,15 @@ public class VistaGioco extends Canvas {
      * @param azioneFineScenario azione da eseguire quando scenario o game over finiscono
      */
     public VistaGioco(MotoreGioco motoreGioco, Runnable azioneFineScenario) {
+        this(motoreGioco, azioneFineScenario, new TestiInterfaccia());
+    }
+
+    // Condivide la lingua selezionata nel menu con il renderer della partita.
+    VistaGioco(MotoreGioco motoreGioco, Runnable azioneFineScenario, TestiInterfaccia testi) {
         super(MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
         this.motoreGioco = motoreGioco;
         this.azioneFineScenario = azioneFineScenario;
-        this.renderGioco = new RenderGioco(motoreGioco, archivioSprite);
+        this.renderGioco = new RenderGioco(motoreGioco, archivioSprite, testi);
         setFocusTraversable(true);
         avviaCicloGioco();
     }

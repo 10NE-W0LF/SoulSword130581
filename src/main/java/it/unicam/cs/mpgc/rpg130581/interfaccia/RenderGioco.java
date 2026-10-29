@@ -32,10 +32,12 @@ class RenderGioco {
 
     private final MotoreGioco motoreGioco;
     private final ArchivioSprite archivioSprite;
+    private final TestiInterfaccia testi;
 
-    RenderGioco(MotoreGioco motoreGioco, ArchivioSprite archivioSprite) {
+    RenderGioco(MotoreGioco motoreGioco, ArchivioSprite archivioSprite, TestiInterfaccia testi) {
         this.motoreGioco = motoreGioco;
         this.archivioSprite = archivioSprite;
+        this.testi = testi;
     }
 
     // Disegna un frame completo: mondo con camera, entita' e interfaccia fissa.
@@ -114,7 +116,7 @@ class RenderGioco {
                     vampiro.getVita(), vampiro.getVitaMassima(), Color.rgb(162, 42, 58));
             grafica.setFill(Color.WHITE);
             grafica.setFont(Font.font("SansSerif", FontWeight.BOLD, 12));
-            grafica.fillText(vampiro.getTipo().getNomeVisualizzato() + " Lv " + vampiro.getLivello(),
+            grafica.fillText(testi.nome(vampiro.getTipo()) + " Lv " + vampiro.getLivello(),
                     posizione.getX() + 4, posizione.getY() + dimensione + 12);
         }
     }
@@ -257,15 +259,16 @@ class RenderGioco {
 
         grafica.setFill(Color.WHITE);
         grafica.setFont(Font.font("SansSerif", FontWeight.BOLD, 15));
-        grafica.fillText("Scenario " + motoreGioco.getScenarioCorrente().getNumero() + " - "
-                + motoreGioco.getScenarioCorrente().getNomeVisualizzato(), 236, 43);
+        grafica.fillText(testi.testo("hud.scenario", motoreGioco.getScenarioCorrente().getNumero(),
+                motoreGioco.getScenarioCorrente().getNomeVisualizzato()), 236, 43);
         grafica.setFont(Font.font("SansSerif", 13));
-        String livello = eroe.isLivelloMassimo() ? "Livello 30 MAX" : "Livello " + eroe.getLivello();
+        String livello = eroe.isLivelloMassimo() ? testi.testo("eroe.livelloMassimo")
+                : testi.testo("eroe.livello", eroe.getLivello());
         grafica.fillText(eroe.getNome() + " - " + livello + " - "
-                + eroe.getEvoSoulSword().getNomeVisualizzato(), 236, 67);
-        grafica.fillText("Nemici: " + motoreGioco.getStato().getSconfittiNelloScenario()
-                + "/" + motoreGioco.getScenarioCorrente().getNemiciRegolari(), 236, 91);
-        grafica.fillText("WASD/Frecce: muovi | SHIFT: corsa | SPAZIO: attacca | ESC: pausa", 28, 108);
+                + testi.nome(eroe.getEvoSoulSword()), 236, 67);
+        grafica.fillText(testi.testo("hud.nemici", motoreGioco.getStato().getSconfittiNelloScenario(),
+                motoreGioco.getScenarioCorrente().getNemiciRegolari()), 236, 91);
+        grafica.fillText(testi.testo("hud.comandi"), 28, 108);
         disegnaPozioneCura(grafica, eroe);
     }
 

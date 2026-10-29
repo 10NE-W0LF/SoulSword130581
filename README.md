@@ -43,6 +43,39 @@ cd SoulSword130581
 ./gradlew run
 ```
 
+### Test
+
+I test JUnit sono in `src/test/java`, negli stessi package delle classi verificate.
+La suite controlla progressione e statistiche dell'eroe, personaggi, scenari,
+pozioni, combattimento, generazione dei nemici, movimento, avanzamento della
+partita, annullamento dei tentativi, salvataggi JSON e preferenze di lingua.
+Usa generatori casuali controllati, archivi di prova e cartelle temporanee;
+non modifica i salvataggi della partita in `data/`.
+
+```bash
+./gradlew test
+```
+
+`./gradlew build` esegue anche questi test. Il report HTML viene generato in
+`build/reports/tests/test/index.html`.
+
+I test che richiedono JavaFX sono separati e richiedono una sessione grafica:
+
+```bash
+./gradlew testInterfaccia
+```
+
+Verificano menu lingua, conferma e annullamento, riavvio, errori di salvataggio,
+pausa, collegamento tra vista e motore, disegno del frame, sprite e cache delle
+immagini. Il report e' in `build/reports/tests/testInterfaccia/index.html`.
+Il punto di ingresso `Main` e le interfacce prive di implementazione non hanno
+test di soli getter o di semplice avvio: i loro collegamenti sono verificati
+attraverso le implementazioni e i test d'integrazione.
+
+Su Windows la configurazione Gradle rimuove l'attributo DOS di sola lettura dai
+soli output in `build/` prima della pulizia, per evitare errori di accesso sui
+risultati generati.
+
 ## Funzionalita' Principali
 
 ### Sistema di personaggio RPG con:
@@ -115,6 +148,13 @@ Tutte le sprite usate in questo gioco sono state prese da questo sito https://cr
 - **Schermo intero / Modalita' finestra** disponibile solo nel menu principale.
 - **Salva** per salvare la partita dal menu di selezione scenario.
 - **Carica partita** per caricare un salvataggio dal menu principale.
+- **Lingua / Language** nel menu principale apre una schermata dedicata con
+  **Italiano**, **English**, **Salva / Save** e **Indietro / Back**.
+  Salva applica la lingua a menu, statistiche, pausa, HUD ed esiti e la memorizza
+  in `data/preferenze.properties` per i successivi avvii. Indietro annulla la scelta
+  non confermata. La lingua viene ricordata anche salvando la partita o vincendo
+  uno scenario. Senza preferenze salvate si usa l'italiano.
+  Nell'interfaccia inglese gli scenari sono indicati come **Stages**.
 
 La modalita' schermo intero mantiene le proporzioni di gioco e menu, con eventuali
 bande nere sui monitor con proporzioni diverse. Rimane attiva durante i cambi di
