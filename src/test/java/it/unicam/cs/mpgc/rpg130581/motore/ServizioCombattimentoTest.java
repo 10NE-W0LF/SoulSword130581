@@ -1,6 +1,7 @@
 package it.unicam.cs.mpgc.rpg130581.motore;
 
 import it.unicam.cs.mpgc.rpg130581.modello.combattimento.EsitoCombattimento;
+import it.unicam.cs.mpgc.rpg130581.modello.partita.TipoEventoGioco;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.Eroe;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.TipoVampiro;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.Vampiro;
@@ -29,7 +30,7 @@ public class ServizioCombattimentoTest {
         assertFalse(esito.isEroeSconfitto());
         assertEquals(0, eroe.getEsperienza());
         assertEquals(0, eroe.getVSconfitti());
-        assertFalse(esito.getMessaggio().isBlank());
+        assertEquals(TipoEventoGioco.colpoScambiato, esito.getEvento().tipo());
     }
 
     @Test
@@ -85,6 +86,6 @@ public class ServizioCombattimentoTest {
         assertTrue(esito.isVampiroSconfitto());
         assertEquals(782, eroe.getEsperienza());
         assertEquals(1, eroe.getVSconfitti());
-        assertTrue(esito.getMessaggio().contains("alba"));
+        assertEquals(TipoEventoGioco.bossSconfitto, esito.getEvento().tipo());
     }
 }

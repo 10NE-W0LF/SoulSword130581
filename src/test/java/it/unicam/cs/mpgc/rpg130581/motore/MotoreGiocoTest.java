@@ -1,6 +1,7 @@
 package it.unicam.cs.mpgc.rpg130581.motore;
 
 import it.unicam.cs.mpgc.rpg130581.modello.partita.FaseGioco;
+import it.unicam.cs.mpgc.rpg130581.modello.partita.TipoEventoGioco;
 import it.unicam.cs.mpgc.rpg130581.modello.partita.ScenarioGioco;
 import it.unicam.cs.mpgc.rpg130581.modello.partita.StatoPartita;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.Eroe;
@@ -261,7 +262,8 @@ public class MotoreGiocoTest {
         StatoPartita prima = motore.getStato();
         assertFalse(motore.salva());
         assertSame(prima, motore.getStato());
-        assertTrue(motore.getUltimoMessaggio().contains("simulato"));
+        assertEquals(TipoEventoGioco.salvataggioFallito, motore.getUltimoEvento().tipo());
+        assertTrue(motore.getUltimoEvento().dati().getFirst().toString().contains("simulato"));
     }
 
     @Test
@@ -285,7 +287,8 @@ public class MotoreGiocoTest {
         assertSame(prima, motore.getStato());
         assertEquals(FaseGioco.inGioco, motore.getFase());
         assertEquals(3, motore.getVampiri().size());
-        assertTrue(motore.getUltimoMessaggio().contains("simulato"));
+        assertEquals(TipoEventoGioco.caricamentoFallito, motore.getUltimoEvento().tipo());
+        assertTrue(motore.getUltimoEvento().dati().getFirst().toString().contains("simulato"));
     }
 
     private void carica(Eroe eroe, int scenarioSbloccato) {

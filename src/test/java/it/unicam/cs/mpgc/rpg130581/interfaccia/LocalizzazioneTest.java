@@ -2,6 +2,8 @@ package it.unicam.cs.mpgc.rpg130581.interfaccia;
 
 import it.unicam.cs.mpgc.rpg130581.modello.impostazioni.Lingua;
 import it.unicam.cs.mpgc.rpg130581.modello.partita.ScenarioGioco;
+import it.unicam.cs.mpgc.rpg130581.modello.partita.EventoGioco;
+import it.unicam.cs.mpgc.rpg130581.modello.partita.TipoEventoGioco;
 import it.unicam.cs.mpgc.rpg130581.modello.partita.StatoPartita;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.EvoSoulSword;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.TipoVampiro;
@@ -19,6 +21,21 @@ import java.util.regex.Pattern;
 
 /** Regressioni sulle traduzioni e sulla lingua ricordata ai successivi avvii. */
 public final class LocalizzazioneTest {
+    @Test
+    public void eventiDelMotoreSonoTradottiConDatiENomiLocalizzati() {
+        TestiInterfaccia testi = new TestiInterfaccia();
+        EventoGioco colpo = EventoGioco.di(TipoEventoGioco.colpoSubito, TipoVampiro.vampiroBase, 12);
+        richiedi(testi.evento(colpo).equals("Vampiro ti colpisce: -12 vita."), "Evento italiano");
+        testi.impostaLingua(Lingua.inglese);
+        richiedi(testi.evento(colpo).equals("Vampire hits you: -12 HP."), "Evento inglese");
+        richiedi(testi.evento(EventoGioco.di(TipoEventoGioco.vittoriaScenario, ScenarioGioco.castello))
+                .equals("Victory! You have completed Castle."), "Scenario localizzato");
+        for (TipoEventoGioco tipo : TipoEventoGioco.values()) {
+            richiedi(ResourceBundle.getBundle("lingue.testi", Locale.ITALIAN).containsKey("evento." + tipo.name()),
+                    "Evento privo di traduzione: " + tipo);
+        }
+    }
+
     @Test
     public void verificaTraduzioni() {
         ResourceBundle italiano = ResourceBundle.getBundle("lingue.testi", Locale.ITALIAN);
@@ -51,11 +68,11 @@ public final class LocalizzazioneTest {
             }
             richiedi(testi.nome(EvoSoulSword.lamaDiSangue).equals("SoulSword: Blood Blade"), "SoulSword");
             richiedi(testi.nome(TipoVampiro.arciduca).equals("Vampire Archduke"), "Boss");
-            richiedi(testi.messaggioEsito(true, ScenarioGioco.castello)
+            richiedi(testi.evento(EventoGioco.di(TipoEventoGioco.vittoriaScenario, ScenarioGioco.castello))
                     .equals("Victory! You have completed Castle."), "Vittoria scenario");
-            richiedi(testi.messaggioEsito(true, ScenarioGioco.salaDelTrono).contains("hunt is over"),
+            richiedi(testi.evento(EventoGioco.di(TipoEventoGioco.vittoriaFinale)).contains("hunt is over"),
                     "Vittoria finale");
-            richiedi(testi.messaggioEsito(false, ScenarioGioco.castello).contains("defeated"), "Sconfitta");
+            richiedi(testi.evento(EventoGioco.di(TipoEventoGioco.notteVincente)).contains("defeated"), "Sconfitta");
             testi.impostaLingua(Lingua.italiano);
             richiedi(testi.nome(EvoSoulSword.mietitriceDellAlba)
                     .equals("SoulSword: Mietitrice dell'Alba"), "Ritorno all'italiano e apostrofi");

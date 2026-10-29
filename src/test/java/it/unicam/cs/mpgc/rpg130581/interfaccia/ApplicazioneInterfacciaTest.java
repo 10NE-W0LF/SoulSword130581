@@ -11,6 +11,7 @@ import it.unicam.cs.mpgc.rpg130581.motore.VampiroNelMondo;
 import it.unicam.cs.mpgc.rpg130581.persistenza.ArchivioPartita;
 import it.unicam.cs.mpgc.rpg130581.persistenza.ArchivioPreferenze;
 import javafx.application.Platform;
+import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
@@ -41,6 +42,7 @@ public class ApplicazioneInterfacciaTest {
     private MotoreGioco motore;
     private ArchivioProva archivio;
     private PreferenzeProva preferenze;
+    private AppSoulSword applicazione;
 
     @BeforeClass
     public static void avviaJavaFx() throws InterruptedException {
@@ -78,8 +80,9 @@ public class ApplicazioneInterfacciaTest {
             if (finestra != null) {
                 finestra.close();
             }
-            AppSoulSword.setMotoreGioco(null);
-            AppSoulSword.setArchivioPreferenze(null);
+            if (applicazione != null) {
+                applicazione.ferma();
+            }
         });
     }
 
@@ -228,6 +231,95 @@ public class ApplicazioneInterfacciaTest {
         });
     }
 
+    @Test
+    public void foglioStileComuneSiApplicaAncheAlleSchermateRicostruite() throws Exception {
+        sulThreadGrafico(() -> {
+            // Nascondere uno Stage azzera i font CSS: verifica la finestra nelle condizioni d'uso reali.
+            finestra.show();
+            finestra.getScene().getRoot().applyCss();
+            finestra.getScene().getRoot().layout();
+            assertEquals(250, bottone("Nuova partita").getMinWidth(), 0);
+            assertEquals(44, bottone("Nuova partita").getMinHeight(), 0);
+            assertEquals(15, bottone("Nuova partita").getFont().getSize(), 0);
+            Text titolo = nodi().stream().filter(Text.class::isInstance).map(Text.class::cast)
+                    .filter(text -> text.getText().equals("SoulSword")).findFirst().orElseThrow();
+            assertEquals(58, titolo.getFont().getSize(), 0);
+            assertEquals(javafx.scene.paint.Color.rgb(210, 238, 255), titolo.getFill());
+            bottone("Nuova partita").fire();
+            finestra.getScene().getRoot().applyCss();
+            finestra.getScene().getRoot().layout();
+            assertEquals(96, bottone("Forza +").getMinWidth(), 0);
+            assertEquals(34, bottone("Salute +").getMinHeight(), 0);
+            assertEquals(13, bottone("Forza +").getFont().getSize(), 0);
+            for (Node nodo : nodi()) {
+                assertTrue("Stile inline residuo", nodo.getStyle().isEmpty());
+            }
+            assertEquals(1, finestra.getScene().getStylesheets().size());
+            finestra.hide();
+        });
+    }
+
+    @Test
+    public void f11NonRipeteIlToggleFincheIlTastoNonVieneRilasciato() throws Exception {
+        sulThreadGrafico(() -> {
+            inviaF11(KeyEvent.KEY_PRESSED);
+            assertTrue(finestra.isFullScreen());
+            assertNotNull(bottone("Modalita' finestra"));
+            inviaF11(KeyEvent.KEY_PRESSED);
+            assertTrue(finestra.isFullScreen());
+            bottone("Lingua").fire();
+            assertTrue(finestra.isFullScreen());
+            inviaF11(KeyEvent.KEY_RELEASED);
+            inviaF11(KeyEvent.KEY_PRESSED);
+            assertFalse(finestra.isFullScreen());
+            inviaF11(KeyEvent.KEY_RELEASED);
+        });
+    }
+
+    @Test
+    public void caricamentoFallitoRestaNelMenuEMostraUnErroreLocalizzato() throws Exception {
+        sulThreadGrafico(() -> {
+            archivio.fallisciLettura = true;
+            bottone("Carica partita").fire();
+            assertNotNull(bottone("Nuova partita"));
+            assertTrue(contieneTesto("Caricamento fallito: test"));
+        });
+    }
+
+    @Test
+    public void vittoriaSalvaLaSessioneEPreservaIlMessaggioDelloScenario() throws Exception {
+        CountDownLatch conclusione = new CountDownLatch(1);
+        sulThreadGrafico(() -> {
+            VistaGioco vista = avviaPrimoScenario();
+            finestra.getScene().rootProperty().addListener((proprieta, prima, dopo) -> {
+                if (contieneTesto("Vittoria")) {
+                    conclusione.countDown();
+                }
+            });
+            for (int i = 0; i < 8; i++) {
+                motore.aggiornaMondo();
+                VampiroNelMondo vampiro = motore.getVampiri().getFirst();
+                vampiro.getPosizione().muovi(motore.getPosizioneEroe().getX() - vampiro.getPosizione().getX(),
+                        motore.getPosizioneEroe().getY() - vampiro.getPosizione().getY(), 880, 540);
+                vampiro.getVampiro().subisciDanno(vampiro.getVampiro().getVita() - 1);
+                vista.attacca();
+            }
+        });
+        assertTrue("Schermata finale non mostrata", conclusione.await(5, TimeUnit.SECONDS));
+        sulThreadGrafico(() -> {
+            assertEquals(1, archivio.salvataggi);
+            assertEquals(1, preferenze.scritture);
+            assertTrue(contieneTesto("Vittoria! Hai completato Dead Forest."));
+            bottone("Scenari").fire();
+            assertEquals(ScenarioGioco.profonditaForestaMorta, motore.getScenarioCorrente());
+        });
+    }
+
+    private void inviaF11(javafx.event.EventType<KeyEvent> tipo) {
+        Event.fireEvent(finestra.getScene().getRoot(),
+                new KeyEvent(tipo, "", "", KeyCode.F11, false, false, false, false));
+    }
+
     private void verificaSprite(Image immagine) {
         assertFalse(immagine.isError());
         assertTrue(immagine.getWidth() >= 64);
@@ -238,10 +330,9 @@ public class ApplicazioneInterfacciaTest {
 
     private void avviaApplicazione() {
         motore = new MotoreGioco(archivio);
-        AppSoulSword.setMotoreGioco(motore);
-        AppSoulSword.setArchivioPreferenze(preferenze);
         finestra = new Stage();
-        new AppSoulSword().start(finestra);
+        applicazione = new AppSoulSword(motore, preferenze);
+        applicazione.start(finestra);
         finestra.hide();
     }
 
@@ -307,8 +398,12 @@ public class ApplicazioneInterfacciaTest {
 
     private static class ArchivioProva implements ArchivioPartita {
         private int salvataggi;
+        private boolean fallisciLettura;
         @Override public void salva(StatoPartita stato) { salvataggi++; }
-        @Override public StatoPartita carica() { return new StatoPartita(); }
+        @Override public StatoPartita carica() throws IOException {
+            if (fallisciLettura) throw new IOException("test");
+            return new StatoPartita();
+        }
     }
 
     private static class PreferenzeProva implements ArchivioPreferenze {

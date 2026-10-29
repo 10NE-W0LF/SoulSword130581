@@ -1,6 +1,6 @@
 package it.unicam.cs.mpgc.rpg130581.modello.combattimento;
 
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 /**
  * Definisce le regole della Pozione Cura.
@@ -21,7 +21,7 @@ public final class PozioneCura {
      * @param random generatore casuale usato dal motore
      * @return true se il drop della pozione riesce
      */
-    public static boolean esceDalDrop(Random random) {
+    public static boolean esceDalDrop(RandomGenerator random) {
         return random.nextInt(100) < dropPercentuale;
     }
 }

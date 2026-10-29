@@ -3,6 +3,8 @@ package it.unicam.cs.mpgc.rpg130581.motore;
 import it.unicam.cs.mpgc.rpg130581.modello.combattimento.EsitoCombattimento;
 import it.unicam.cs.mpgc.rpg130581.modello.combattimento.PozioneCura;
 import it.unicam.cs.mpgc.rpg130581.modello.partita.FaseGioco;
+import it.unicam.cs.mpgc.rpg130581.modello.partita.EventoGioco;
+import it.unicam.cs.mpgc.rpg130581.modello.partita.TipoEventoGioco;
 import it.unicam.cs.mpgc.rpg130581.modello.partita.ScenarioGioco;
 import it.unicam.cs.mpgc.rpg130581.modello.partita.StatoPartita;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.Eroe;
@@ -11,10 +13,12 @@ import it.unicam.cs.mpgc.rpg130581.modello.personaggi.Vampiro;
 import it.unicam.cs.mpgc.rpg130581.persistenza.ArchivioPartita;
 
 import java.io.IOException;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
+import java.util.Objects;
+import java.util.random.RandomGenerator;
 
 /**
  * Classe centrale della logica di gioco.
@@ -28,16 +32,17 @@ public class MotoreGioco {
     private static final double raggioDannoContatto = 38.0;
     private static final long ricaricaDannoVampiroMs = 1150;
 
-    private final Random random = new Random();
-    private final GeneratoreV generatoreV = new GeneratoreV(random);
-    private final ServizioCombattimento servizioCombattimento = new ServizioCombattimento(random);
+    private final RandomGenerator random;
+    private final Clock orologio;
+    private final GenerazioneVampiri generatoreV;
+    private final Combattimento servizioCombattimento;
     private final ArchivioPartita archivioPartita;
     private final List<VampiroNelMondo> vampiri = new ArrayList<VampiroNelMondo>();
     private StatoPartita stato = new StatoPartita();
     private StatoPartita statoPrimaScenario;
     private Posizione posizioneEroe = nuovaPosizioneCentrale();
     private FaseGioco fase = FaseGioco.selezioneScenario;
-    private String ultimoMessaggio = "La SoulSword attende una nuova caccia.";
+    private EventoGioco ultimoEvento = EventoGioco.di(TipoEventoGioco.attesaCaccia);
     private long ultimoDannoEroeMillis;
 
     /**
@@ -46,7 +51,22 @@ public class MotoreGioco {
      * @param archivioPartita archivio usato per la persistenza della partita
      */
     public MotoreGioco(ArchivioPartita archivioPartita) {
-        this.archivioPartita = archivioPartita;
+        this(archivioPartita, RandomGenerator.getDefault(), Clock.systemUTC());
+    }
+
+    /** Costruttore di comodità; casualità e tempo possono essere controllati nei test. */
+    public MotoreGioco(ArchivioPartita archivioPartita, RandomGenerator random, Clock orologio) {
+        this(archivioPartita, new GeneratoreV(random), new ServizioCombattimento(random), random, orologio);
+    }
+
+    /** Tutte le dipendenze del coordinatore sono sostituibili senza cambiare le regole del motore. */
+    public MotoreGioco(ArchivioPartita archivioPartita, GenerazioneVampiri generatoreV,
+                       Combattimento combattimento, RandomGenerator random, Clock orologio) {
+        this.archivioPartita = Objects.requireNonNull(archivioPartita);
+        this.generatoreV = Objects.requireNonNull(generatoreV);
+        this.servizioCombattimento = Objects.requireNonNull(combattimento);
+        this.random = Objects.requireNonNull(random);
+        this.orologio = Objects.requireNonNull(orologio);
     }
 
     /**
@@ -58,7 +78,7 @@ public class MotoreGioco {
         vampiri.clear();
         posizioneEroe = nuovaPosizioneCentrale();
         fase = FaseGioco.selezioneScenario;
-        ultimoMessaggio = "Nuova partita creata. Scegli uno scenario.";
+        ultimoEvento = EventoGioco.di(TipoEventoGioco.nuovaPartita);
     }
 
     /**
@@ -70,7 +90,7 @@ public class MotoreGioco {
      */
     public boolean avviaScenario(ScenarioGioco scenario) {
         if (!stato.isScenarioSbloccato(scenario)) {
-            ultimoMessaggio = "Completa prima lo scenario precedente.";
+            ultimoEvento = EventoGioco.di(TipoEventoGioco.scenarioBloccato);
             return false;
         }
 
@@ -80,7 +100,7 @@ public class MotoreGioco {
         posizioneEroe = nuovaPosizioneCentrale();
         fase = FaseGioco.inGioco;
         ultimoDannoEroeMillis = 0;
-        ultimoMessaggio = "Scenario avviato: " + scenario.getNomeVisualizzato() + ".";
+        ultimoEvento = EventoGioco.di(TipoEventoGioco.scenarioAvviato, scenario);
         generaVampiriIniziali();
         return true;
     }
@@ -91,7 +111,7 @@ public class MotoreGioco {
     public void annullaScenarioSenzaProgressi() {
         if (statoPrimaScenario != null && fase != FaseGioco.vittoria) {
             stato = copiaStato(statoPrimaScenario);
-            ultimoMessaggio = "Scenario interrotto. I progressi non sono stati salvati.";
+            ultimoEvento = EventoGioco.di(TipoEventoGioco.scenarioInterrotto);
         }
         statoPrimaScenario = null;
         vampiri.clear();
@@ -153,19 +173,19 @@ public class MotoreGioco {
         }
         VampiroNelMondo vampiroVicino = vampiroVicinoNelRaggio();
         if (vampiroVicino == null) {
-            ultimoMessaggio = "Nessun vampiro nel raggio della SoulSword.";
+            ultimoEvento = EventoGioco.di(TipoEventoGioco.nessunBersaglio);
             return;
         }
 
-        long adesso = System.currentTimeMillis();
+        long adesso = orologio.millis();
         vampiroVicino.registraDanno(adesso);
         EsitoCombattimento esito = servizioCombattimento.attacca(stato.getEroe(), vampiroVicino.getVampiro());
-        ultimoMessaggio = esito.getMessaggio();
+        ultimoEvento = esito.getEvento();
         if (esito.getDannoVampiro() > 0) {
             ultimoDannoEroeMillis = adesso;
         }
         if (esito.isEroeSconfitto()) {
-            terminaConGameOver("La notte ha vinto. Sei stato sconfitto.");
+            terminaConGameOver(TipoEventoGioco.notteVincente);
             return;
         }
         if (esito.isVampiroSconfitto()) {
@@ -189,12 +209,11 @@ public class MotoreGioco {
         }
         Eroe eroe = stato.getEroe();
         if (eroe.usaPozioneCura()) {
-            ultimoMessaggio = "Pozione Cura usata: +" + PozioneCura.valoreCura + " vita.";
+            ultimoEvento = EventoGioco.di(TipoEventoGioco.pozioneUsata, PozioneCura.valoreCura);
             return;
         }
-        ultimoMessaggio = eroe.getPozioniCura() <= 0
-                ? "Non hai Pozioni Cura."
-                : "La vita e' gia' al massimo.";
+        ultimoEvento = EventoGioco.di(eroe.getPozioniCura() <= 0
+                ? TipoEventoGioco.pozioniEsaurite : TipoEventoGioco.vitaMassima);
     }
 
     /**
@@ -205,10 +224,11 @@ public class MotoreGioco {
     public boolean salva() {
         try {
             archivioPartita.salva(stato);
-            ultimoMessaggio = "Partita salvata.";
+            ultimoEvento = EventoGioco.di(TipoEventoGioco.partitaSalvata);
             return true;
         } catch (IOException exception) {
-            ultimoMessaggio = "Salvataggio fallito: " + exception.getMessage();
+            ultimoEvento = EventoGioco.di(TipoEventoGioco.salvataggioFallito,
+                    Objects.toString(exception.getMessage(), exception.getClass().getSimpleName()));
             return false;
         }
     }
@@ -216,16 +236,19 @@ public class MotoreGioco {
     /**
      * Carica una partita salvata e torna alla selezione scenario.
      */
-    public void carica() {
+    public boolean carica() {
         try {
             stato = archivioPartita.carica();
             statoPrimaScenario = null;
             vampiri.clear();
             posizioneEroe = nuovaPosizioneCentrale();
             fase = FaseGioco.selezioneScenario;
-            ultimoMessaggio = "Partita caricata. Scegli uno scenario.";
+            ultimoEvento = EventoGioco.di(TipoEventoGioco.partitaCaricata);
+            return true;
         } catch (IOException exception) {
-            ultimoMessaggio = "Caricamento fallito: " + exception.getMessage();
+            ultimoEvento = EventoGioco.di(TipoEventoGioco.caricamentoFallito,
+                    Objects.toString(exception.getMessage(), exception.getClass().getSimpleName()));
+            return false;
         }
     }
 
@@ -286,14 +309,14 @@ public class MotoreGioco {
                 && !stato.isBossSconfitto()
                 && !bossAttivo()) {
             vampiri.add(new VampiroNelMondo(generatoreV.creaBoss(), posizioneCasualeSulBordo()));
-            ultimoMessaggio = "L'Arciduca Vampiro scende dal trono.";
+            ultimoEvento = EventoGioco.di(TipoEventoGioco.bossEvocato);
         }
     }
 
     // Tenta il drop della pozione dopo la sconfitta di un vampiro.
     private void provaDropPozione(Vampiro vampiro) {
         if (PozioneCura.esceDalDrop(random) && stato.getEroe().aggiungiPozioneCura()) {
-            ultimoMessaggio = vampiro.getTipo().getNomeVisualizzato() + " lascia una Pozione Cura.";
+            ultimoEvento = EventoGioco.di(TipoEventoGioco.pozioneRilasciata, vampiro.getTipo());
         }
     }
 
@@ -304,7 +327,7 @@ public class MotoreGioco {
             if (stato.isBossSconfitto()) {
                 stato.sbloccaScenarioSuccessivo();
                 fase = FaseGioco.vittoria;
-                ultimoMessaggio = "Vittoria! La Throne Room e' libera e la caccia e' conclusa.";
+                ultimoEvento = EventoGioco.di(TipoEventoGioco.vittoriaFinale);
             }
             return;
         }
@@ -312,14 +335,14 @@ public class MotoreGioco {
         if (nemiciRegolariEliminati()) {
             stato.sbloccaScenarioSuccessivo();
             fase = FaseGioco.vittoria;
-            ultimoMessaggio = "Vittoria! Hai completato " + scenario.getNomeVisualizzato() + ".";
+            ultimoEvento = EventoGioco.di(TipoEventoGioco.vittoriaScenario, scenario);
         }
     }
 
-    private void terminaConGameOver(String messaggio) {
+    private void terminaConGameOver(TipoEventoGioco tipo) {
         fase = FaseGioco.gameOver;
         vampiri.clear();
-        ultimoMessaggio = messaggio;
+        ultimoEvento = EventoGioco.di(tipo);
     }
 
     // Piazza i nemici ai bordi della mappa per farli entrare gradualmente nell'area di gioco.
@@ -367,17 +390,17 @@ public class MotoreGioco {
     // Infligge danno a contatto rispettando un tempo di ricarica tra un colpo e l'altro.
     private void provaADanneggiareEroe(VampiroNelMondo vampiroNelMondo) {
         double distanza = vampiroNelMondo.getPosizione().distanzaDa(posizioneEroe);
-        long adesso = System.currentTimeMillis();
+        long adesso = orologio.millis();
         if (distanza <= raggioDannoContatto
                 && vampiroNelMondo.puoAttaccare(adesso, ricaricaDannoVampiroMs)) {
             int danno = Math.max(1, vampiroNelMondo.getVampiro().getPotenzaAttacco() / 2 + random.nextInt(4));
             stato.getEroe().subisciDanno(danno);
             vampiroNelMondo.registraAttacco(adesso);
             ultimoDannoEroeMillis = adesso;
-            ultimoMessaggio = vampiroNelMondo.getVampiro().getTipo().getNomeVisualizzato()
-                    + " ti colpisce: -" + danno + " vita.";
+            ultimoEvento = EventoGioco.di(TipoEventoGioco.colpoSubito,
+                    vampiroNelMondo.getVampiro().getTipo(), danno);
             if (stato.getEroe().isSconfitto()) {
-                terminaConGameOver("Game Over. I vampiri hanno spezzato la SoulSword.");
+                terminaConGameOver(TipoEventoGioco.gameOver);
             }
         }
     }
@@ -417,8 +440,8 @@ public class MotoreGioco {
         return Collections.unmodifiableList(vampiri);
     }
 
-    public String getUltimoMessaggio() {
-        return ultimoMessaggio;
+    public EventoGioco getUltimoEvento() {
+        return ultimoEvento;
     }
 
     public ScenarioGioco getScenarioCorrente() {

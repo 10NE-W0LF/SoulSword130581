@@ -108,4 +108,47 @@ public class SalvataggiTest {
         assertThrows(IOException.class, archivio::carica);
         assertThrows(IOException.class, () -> archivio.salva(new StatoPartita()));
     }
+
+    @Test
+    public void jsonMalformatoNonDiventaSilenziosamenteUnaNuovaPartita() {
+        for (String json : new String[]{"", "null", "[]", "{", "{livello: 5}",
+                "{\"livello\": 5,}", "{} {}", "{\"eroe\":null}"}) {
+            assertThrows("JSON da rifiutare: " + json, IOException.class, () -> caricaJson(json));
+        }
+    }
+
+    @Test
+    public void tipiErratiENumeriFuoriIntervalloSonoRifiutati() {
+        for (String json : new String[]{"{\"livello\":\"5\"}", "{\"livello\":true}",
+                "{\"livello\":1.5}", "{\"livello\":2147483648}", "{\"vita\":null}",
+                "{\"bossSconfitto\":\"true\"}", "{\"eroe\":[]}"}) {
+            assertThrows("Tipo non valido: " + json, IOException.class, () -> caricaJson(json));
+        }
+    }
+
+    @Test
+    public void campiAnnidatiEstraneiNonSostituisconoQuelliDellEroe() throws IOException {
+        StatoPartita stato = caricaJson("{\"nemico\":{\"livello\":30},\"eroe\":{\"livello\":5},"
+                + "\"numeroScenario\":2}");
+        assertEquals(5, stato.getEroe().getLivello());
+        assertEquals(2, stato.getNumeroScenario());
+    }
+
+    @Test
+    public void erroreDiLetturaNonModificaIlSalvataggioCorrotto() throws IOException {
+        Path file = cartella.newFile().toPath();
+        Files.writeString(file, "contenuto non valido");
+        assertThrows(IOException.class, () -> new Salvataggi(file).carica());
+        assertEquals("contenuto non valido", Files.readString(file));
+    }
+
+    @Test
+    public void scritturaNonLasciaFileTemporanei() throws IOException {
+        Salvataggi archivio = new Salvataggi(percorso());
+        archivio.salva(new StatoPartita());
+        archivio.salva(new StatoPartita());
+        try (var file = Files.list(percorso().getParent())) {
+            assertEquals(java.util.List.of(percorso()), file.toList());
+        }
+    }
 }

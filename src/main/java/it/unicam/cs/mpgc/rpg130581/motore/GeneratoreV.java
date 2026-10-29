@@ -4,23 +4,24 @@ import it.unicam.cs.mpgc.rpg130581.modello.partita.ScenarioGioco;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.TipoVampiro;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.Vampiro;
 
-import java.util.Random;
+import java.util.Objects;
+import java.util.random.RandomGenerator;
 
 /**
  * Responsabile della creazione dei vampiri.
  * Usa i dati dello scenario per decidere livello e probabilita' di nemici elite.
  */
-public class GeneratoreV {
+public class GeneratoreV implements GenerazioneVampiri {
 
-    private final Random random;
+    private final RandomGenerator random;
 
     /**
      * Crea un generatore di vampiri.
      *
      * @param random generatore casuale condiviso con il motore
      */
-    public GeneratoreV(Random random) {
-        this.random = random;
+    public GeneratoreV(RandomGenerator random) {
+        this.random = Objects.requireNonNull(random);
     }
 
     /**

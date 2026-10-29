@@ -1,16 +1,10 @@
 package it.unicam.cs.mpgc.rpg130581.avvio;
 
-import it.unicam.cs.mpgc.rpg130581.motore.MotoreGioco;
-import it.unicam.cs.mpgc.rpg130581.interfaccia.AppSoulSword;
-import it.unicam.cs.mpgc.rpg130581.persistenza.Salvataggi;
-import it.unicam.cs.mpgc.rpg130581.persistenza.SalvataggiPreferenze;
 import javafx.application.Application;
-
-import java.nio.file.Paths;
 
 /**
  * Punto di ingresso del progetto.
- * Prepara il sistema di salvataggio, collega il motore alla GUI e avvia JavaFX.
+ * Avvia il ciclo di vita JavaFX; la composizione delle dipendenze è in AvvioJavaFx.
  */
 public final class Main {
 
@@ -23,9 +17,6 @@ public final class Main {
      * @param args argomenti ricevuti dalla riga di comando
      */
     public static void main(String[] args) {
-        Salvataggi salvataggi = new Salvataggi(Paths.get("data", "save.json"));
-        AppSoulSword.setMotoreGioco(new MotoreGioco(salvataggi));
-        AppSoulSword.setArchivioPreferenze(new SalvataggiPreferenze(Paths.get("data", "preferenze.properties")));
-        Application.launch(AppSoulSword.class, args);
+        Application.launch(AvvioJavaFx.class, args);
     }
 }

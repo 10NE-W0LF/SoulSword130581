@@ -1,490 +1,137 @@
 package it.unicam.cs.mpgc.rpg130581.interfaccia;
 
-import it.unicam.cs.mpgc.rpg130581.modello.partita.FaseGioco;
+import it.unicam.cs.mpgc.rpg130581.applicazione.EsitoSalvataggio;
+import it.unicam.cs.mpgc.rpg130581.applicazione.PreferenzeGioco;
+import it.unicam.cs.mpgc.rpg130581.applicazione.SalvataggioSessione;
 import it.unicam.cs.mpgc.rpg130581.modello.impostazioni.Lingua;
+import it.unicam.cs.mpgc.rpg130581.modello.partita.FaseGioco;
 import it.unicam.cs.mpgc.rpg130581.modello.partita.ScenarioGioco;
-import it.unicam.cs.mpgc.rpg130581.modello.personaggi.Eroe;
-import it.unicam.cs.mpgc.rpg130581.modello.personaggi.EvoSoulSword;
 import it.unicam.cs.mpgc.rpg130581.motore.MotoreGioco;
 import it.unicam.cs.mpgc.rpg130581.persistenza.ArchivioPreferenze;
-import javafx.application.Application;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.NumberBinding;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.Group;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import java.io.IOException;
+import java.util.Objects;
 
-/**
- * Applicazione JavaFX principale.
- * Costruisce i menu, collega gli input alla vista di gioco e gestisce i cambi di schermata.
- */
-public class AppSoulSword extends Application {
-
-    private static MotoreGioco motoreGioco;
-    private static ArchivioPreferenze archivioPreferenze;
-
-    private Stage finestra;
-    private boolean tastoSchermoInteroPremuto;
-    private final ArchivioSprite archivioSprite = new ArchivioSprite();
+/** Coordina navigazione e casi d'uso. Le viste e la configurazione JavaFX sono componenti separati. */
+public final class AppSoulSword {
+    private final MotoreGioco motore;
+    private final PreferenzeGioco preferenze;
+    private final SalvataggioSessione salvataggio;
+    private final ArchivioSprite immagini = new ArchivioSprite();
     private final TestiInterfaccia testi = new TestiInterfaccia();
-    private boolean erroreLetturaPreferenze;
+    private Stage finestra;
+    private GestoreFinestra gestoreFinestra;
+    private SchermataPartita partita;
 
-    /**
-     * Collega il motore di gioco alla GUI prima dell'avvio JavaFX.
-     *
-     * @param nuovoMotoreGioco motore da usare nell'applicazione
-     */
-    public static void setMotoreGioco(MotoreGioco nuovoMotoreGioco) {
-        motoreGioco = nuovoMotoreGioco;
+    public AppSoulSword(MotoreGioco motore, ArchivioPreferenze archivioPreferenze) {
+        this.motore = Objects.requireNonNull(motore);
+        preferenze = new PreferenzeGioco(archivioPreferenze);
+        salvataggio = new SalvataggioSessione(motore, preferenze);
     }
 
-    /** Collega l'archivio delle preferenze senza dipendere dal formato del file. */
-    public static void setArchivioPreferenze(ArchivioPreferenze nuovoArchivioPreferenze) {
-        archivioPreferenze = nuovoArchivioPreferenze;
-    }
-
-    /**
-     * Configura la finestra principale e mostra il menu iniziale.
-     *
-     * @param finestra stage principale JavaFX
-     */
-    @Override
     public void start(Stage finestra) {
-        if (motoreGioco == null) {
-            throw new IllegalStateException("MotoreGioco non inizializzato.");
-        }
-        if (archivioPreferenze == null) {
-            throw new IllegalStateException("ArchivioPreferenze non inizializzato.");
-        }
-        try {
-            testi.impostaLingua(archivioPreferenze.caricaLingua());
-        } catch (IOException exception) {
-            erroreLetturaPreferenze = true;
-        }
-
-        this.finestra = finestra;
+        this.finestra = Objects.requireNonNull(finestra);
+        gestoreFinestra = new GestoreFinestra(finestra);
+        preferenze.carica();
+        testi.impostaLingua(preferenze.getLingua());
         finestra.setTitle("SoulSword");
-        finestra.getIcons().add(archivioSprite.iconaSoulSword());
-        finestra.setResizable(false);
-        finestra.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
-        finestra.setFullScreenExitHint("");
-        finestra.focusedProperty().addListener((proprieta, prima, adesso) -> {
-            if (!adesso) {
-                tastoSchermoInteroPremuto = false;
-            }
-        });
+        finestra.getIcons().add(immagini.iconaSoulSword());
+        finestra.setOnCloseRequest(ignored -> ferma());
         mostraMenuPrincipale();
         finestra.show();
     }
 
-    // Schermata iniziale con nuova partita, caricamento e uscita.
     private void mostraMenuPrincipale() {
-        Text titolo = testo("SoulSword", 58, FontWeight.EXTRA_BOLD);
-        titolo.setFill(Color.rgb(210, 238, 255));
-        Text sottotitolo = testo(testi.testo("menu.sottotitolo"), 18, FontWeight.NORMAL);
+        mostraMenuPrincipale(preferenze.isErroreLettura() ? testi.testo("preferenze.erroreLettura") : "");
+    }
 
-        Button nuovaPartita = bottone(testi.testo("menu.nuovaPartita"));
-        Button caricaPartita = bottone(testi.testo("menu.caricaPartita"));
-        Button esci = bottone(testi.testo("menu.esci"));
-
-        Button lingua = bottone(testi.testo("menu.lingua"));
-        lingua.setOnAction(ignored -> mostraMenuLingua());
-
-        nuovaPartita.setOnAction(ignored -> {
-            motoreGioco.nuovaPartita();
+    private void mostraMenuPrincipale(String avviso) {
+        mostra(new MenuPrincipale(testi, finestra.fullScreenProperty(), () -> {
+            motore.nuovaPartita();
             mostraMenuScenari();
-        });
-        caricaPartita.setOnAction(ignored -> {
-            motoreGioco.carica();
-            mostraMenuScenari();
-        });
-        esci.setOnAction(ignored -> finestra.close());
+        }, this::caricaPartita, gestoreFinestra::alternaSchermoIntero,
+                this::mostraMenuLingua, finestra::close, avviso));
+    }
 
-        VBox pannello = pannelloMenu();
-        pannello.getChildren().addAll(titolo, sottotitolo, nuovaPartita, caricaPartita,
-                bottoneSchermoIntero(), lingua, esci);
-        if (erroreLetturaPreferenze) {
-            pannello.getChildren().add(testo(testi.testo("preferenze.erroreLettura"), 14, FontWeight.NORMAL));
+    private void caricaPartita() {
+        if (motore.carica()) {
+            mostraMenuScenari();
+        } else {
+            mostraMenuPrincipale(testi.evento(motore.getUltimoEvento()));
         }
-        impostaScena(schermataConSfondo(pannello));
     }
 
     private void mostraMenuLingua() {
-        MenuLingua menu = new MenuLingua(testi, this::salvaLinguaDalMenu, this::mostraMenuPrincipale);
-        impostaScena(schermataConSfondo(menu));
+        mostra(new MenuLingua(testi, this::salvaLingua, this::mostraMenuPrincipale));
     }
 
-    // La scelta viene applicata solo dopo la conferma e la scrittura delle preferenze.
-    private boolean salvaLinguaDalMenu(Lingua lingua) {
-        try {
-            archivioPreferenze.salvaLingua(lingua);
-            testi.impostaLingua(lingua);
-            erroreLetturaPreferenze = false;
-            mostraMenuPrincipale();
-            return true;
-        } catch (IOException exception) {
+    private boolean salvaLingua(Lingua lingua) {
+        if (!preferenze.salva(lingua)) {
             return false;
         }
+        testi.impostaLingua(preferenze.getLingua());
+        mostraMenuPrincipale();
+        return true;
     }
 
-    /*
-    Menu di selezione scenario.
-    Mostra stato dell'eroe, evoluzione della SoulSword e pulsanti per assegnare stats.
-     */
     private void mostraMenuScenari() {
-        Eroe eroe = motoreGioco.getStato().getEroe();
-
-        ImageView immagineEroe = new ImageView(archivioSprite.eroe(eroe.getEvoSoulSword(), TipoAnimazione.idle));
-        immagineEroe.setViewport(new Rectangle2D(0, 0, 64, 64));
-        immagineEroe.setFitWidth(170);
-        immagineEroe.setFitHeight(170);
-        immagineEroe.setPreserveRatio(true);
-        immagineEroe.setSmooth(false);
-
-        Text titolo = testo(testi.testo("scenari.titolo"), 36, FontWeight.EXTRA_BOLD);
-        Text nomeEroe = testo(eroe.getNome(), 18, FontWeight.BOLD);
-        Text livelloEroe = testo(testi.testo("eroe.livello", eroe.getLivello()), 18, FontWeight.BOLD);
-        Text soulSword = testo(testi.nome(eroe.getEvoSoulSword()), 18, FontWeight.BOLD);
-        Color coloreEvoluzione = coloreSoulSword(eroe.getEvoSoulSword());
-        nomeEroe.setFill(Color.rgb(80, 170, 255));
-        livelloEroe.setFill(coloreEvoluzione);
-        soulSword.setFill(coloreEvoluzione);
-
-        Text stats = testo(testi.testo("eroe.stats", eroe.getStats()), 15, FontWeight.BOLD);
-        Text forza = testo(testi.testo("eroe.forza", eroe.getForza(),
-                eroe.getForza() * Eroe.bonusForza), 14, FontWeight.NORMAL);
-        Text salute = testo(testi.testo("eroe.salute", eroe.getSalute(),
-                eroe.getSalute() * Eroe.bonusSalute), 14, FontWeight.NORMAL);
-
-        Button aumentaForza = bottoneStatistica(testi.testo("eroe.aumentaForza"));
-        aumentaForza.setDisable(eroe.getStats() <= 0);
-        aumentaForza.setOnAction(ignored -> {
-            if (eroe.aumentaForza()) {
-                mostraMenuScenari();
-            }
-        });
-
-        Button aumentaSalute = bottoneStatistica(testi.testo("eroe.aumentaSalute"));
-        aumentaSalute.setDisable(eroe.getStats() <= 0);
-        aumentaSalute.setOnAction(ignored -> {
-            if (eroe.aumentaSalute()) {
-                mostraMenuScenari();
-            }
-        });
-
-        HBox comandiStatistiche = new HBox(8, aumentaForza, aumentaSalute);
-        comandiStatistiche.setAlignment(Pos.CENTER);
-
-        VBox schedaEroe = new VBox(12, immagineEroe, nomeEroe, livelloEroe, soulSword,
-                stats, forza, salute, comandiStatistiche);
-        schedaEroe.setAlignment(Pos.CENTER);
-        schedaEroe.setPadding(new Insets(28));
-        schedaEroe.setMinWidth(280);
-        schedaEroe.setStyle("-fx-background-color: rgba(8, 10, 16, 0.82); -fx-background-radius: 14;");
-
-        VBox listaScenari = new VBox(10);
-        listaScenari.setAlignment(Pos.CENTER_LEFT);
-        for (ScenarioGioco scenario : ScenarioGioco.values()) {
-            boolean scenarioSbloccato = motoreGioco.getStato().isScenarioSbloccato(scenario);
-            Button bottoneScenario = bottone(scenario.getNumero() + "  " + scenario.getNomeVisualizzato()
-                    + "   | " + testi.testo("scenari.nemici", scenario.getNemiciRegolari())
-                    + (scenario.isScenarioBoss() ? "   | " + testi.testo("scenari.boss") : "")
-                    + (scenarioSbloccato ? "" : "   | " + testi.testo("scenari.bloccato")));
-            bottoneScenario.setMaxWidth(Double.MAX_VALUE);
-            bottoneScenario.setDisable(!scenarioSbloccato);
-            bottoneScenario.setOnAction(ignored -> {
-                if (scenarioSbloccato) {
-                    mostraGioco(scenario);
-                }
-            });
-            listaScenari.getChildren().add(bottoneScenario);
-        }
-
-        Button tornaMenu = bottone(testi.testo("menu.principale"));
-        tornaMenu.setOnAction(ignored -> mostraMenuPrincipale());
-        Button salva = bottone(testi.testo("scenari.salva"));
-        Text messaggioSalvataggio = testo("", 14, FontWeight.NORMAL);
-        salva.setOnAction(ignored -> messaggioSalvataggio.setText(testi.testo(salvaPartitaEPreferenze())));
-
-        VBox destra = new VBox(16, titolo, listaScenari, salva, messaggioSalvataggio, tornaMenu);
-        destra.setAlignment(Pos.CENTER_LEFT);
-        destra.setPadding(new Insets(28));
-        destra.setStyle("-fx-background-color: rgba(8, 10, 16, 0.72); -fx-background-radius: 14;");
-
-        HBox contenuto = new HBox(26, schedaEroe, destra);
-        contenuto.setAlignment(Pos.CENTER);
-        contenuto.setPadding(new Insets(32));
-        impostaScena(schermataConSfondo(contenuto));
+        mostra(new MenuScenari(motore.getStato(), immagini, testi, this::mostraGioco,
+                () -> {
+                    if (motore.getStato().getEroe().aumentaForza()) {
+                        mostraMenuScenari();
+                    }
+                }, () -> {
+                    if (motore.getStato().getEroe().aumentaSalute()) {
+                        mostraMenuScenari();
+                    }
+                }, salvataggio::salva, this::mostraMenuPrincipale));
     }
 
-    // Crea la scena di gioco e collega i tasti principali alle azioni del motore.
     private void mostraGioco(ScenarioGioco scenario) {
-        if (!motoreGioco.avviaScenario(scenario)) {
+        if (!motore.avviaScenario(scenario)) {
             mostraMenuScenari();
             return;
         }
-
-        VistaGioco vistaGioco = new VistaGioco(motoreGioco, this::mostraSchermataEsito, testi);
-        StackPane radice = new StackPane(vistaGioco);
-        Scene scena = impostaScena(radice);
-        final boolean[] pausaAperta = {false};
-        scena.setOnKeyPressed(evento -> {
-            if (pausaAperta[0]) {
-                return;
-            }
-            if (evento.getCode() == KeyCode.SPACE) {
-                vistaGioco.attacca();
-            } else if (evento.getCode() == KeyCode.T) {
-                motoreGioco.usaPozioneCura();
-                vistaGioco.disegna();
-            } else if (evento.getCode() == KeyCode.ESCAPE) {
-                pausaAperta[0] = true;
-                mostraPausa(radice, vistaGioco, pausaAperta);
-            } else {
-                vistaGioco.premi(evento.getCode());
-            }
-        });
-        scena.setOnKeyReleased(evento -> vistaGioco.rilascia(evento.getCode()));
-        vistaGioco.requestFocus();
-    }
-
-    // Overlay di pausa, usato senza distruggere la vista di gioco sottostante.
-    private void mostraPausa(StackPane radice, VistaGioco vistaGioco, boolean[] pausaAperta) {
-        vistaGioco.ferma();
-
-        Text titolo = testo(testi.testo("pausa.titolo"), 48, FontWeight.EXTRA_BOLD);
-        titolo.setFill(Color.rgb(210, 238, 255));
-        Text nota = testo(testi.testo("pausa.nota"), 15, FontWeight.NORMAL);
-
-        Button gioca = bottone(testi.testo("pausa.continua"));
-        Button selezioneScenario = bottone(testi.testo("scenari.elenco"));
-
-        VBox pannello = pannelloMenu();
-        pannello.getChildren().addAll(titolo, nota, gioca, selezioneScenario);
-
-        Rectangle ombra = new Rectangle(MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
-        ombra.setFill(Color.rgb(0, 0, 0, 0.62));
-        StackPane overlay = new StackPane(ombra, pannello);
-
-        gioca.setOnAction(ignored -> {
-            radice.getChildren().remove(overlay);
-            pausaAperta[0] = false;
-            vistaGioco.riprendi();
-            vistaGioco.requestFocus();
-        });
-
-        selezioneScenario.setOnAction(ignored -> {
-            vistaGioco.ferma();
-            motoreGioco.annullaScenarioSenzaProgressi();
+        ferma();
+        partita = new SchermataPartita(motore, testi, this::mostraSchermataEsito, () -> {
+            motore.annullaScenarioSenzaProgressi();
             mostraMenuScenari();
         });
-
-        radice.getChildren().add(overlay);
+        partita.collegaInput(gestoreFinestra.mostra(partita));
     }
 
-    // Schermata finale mostrata dopo vittoria o sconfitta dello scenario.
     private void mostraSchermataEsito() {
-        boolean vittoria = motoreGioco.getFase() == FaseGioco.vittoria;
-        ScenarioGioco scenarioConcluso = motoreGioco.getScenarioCorrente();
-        String messaggioFinale = testi.messaggioEsito(vittoria, scenarioConcluso);
-        String esitoSalvataggio = vittoria ? salvaPartitaEPreferenze() : null;
-
-        Text titolo = testo(testi.testo(vittoria ? "esito.titoloVittoria" : "esito.titoloSconfitta"),
-                56, FontWeight.EXTRA_BOLD);
-        titolo.setFill(vittoria ? Color.rgb(80, 220, 255) : Color.rgb(255, 70, 82));
-        Text messaggio = testo(messaggioFinale, 18, FontWeight.NORMAL);
-
-        Button restart = bottone(testi.testo("esito.riprova"));
-        restart.setOnAction(ignored -> {
-            if (!vittoria) {
-                motoreGioco.annullaScenarioSenzaProgressi();
-            }
-            mostraGioco(scenarioConcluso);
-        });
-        Button selezioneScenario = bottone(testi.testo("scenari.elenco"));
-        selezioneScenario.setOnAction(ignored -> {
-            if (vittoria) {
-                motoreGioco.confermaVittoriaScenario();
-            } else {
-                motoreGioco.annullaScenarioSenzaProgressi();
-            }
-            mostraMenuScenari();
-        });
-        Button menuPrincipale = bottone(testi.testo("menu.principale"));
-        menuPrincipale.setOnAction(ignored -> {
-            if (vittoria) {
-                motoreGioco.confermaVittoriaScenario();
-            } else {
-                motoreGioco.annullaScenarioSenzaProgressi();
-            }
-            mostraMenuPrincipale();
-        });
-
-        VBox pannello = pannelloMenu();
-        pannello.getChildren().addAll(titolo, messaggio);
-        if (vittoria && !"salvataggio.riuscito".equals(esitoSalvataggio)) {
-            pannello.getChildren().add(testo(testi.testo(esitoSalvataggio), 14, FontWeight.NORMAL));
-        }
-        if (!vittoria) {
-            pannello.getChildren().add(restart);
-        }
-        pannello.getChildren().addAll(selezioneScenario, menuPrincipale);
-        impostaScena(schermataConSfondo(pannello));
+        boolean vittoria = motore.getFase() == FaseGioco.vittoria;
+        ScenarioGioco scenario = motore.getScenarioCorrente();
+        // Il salvataggio produce un altro evento: conserva prima quello della conclusione.
+        String messaggio = testi.evento(motore.getUltimoEvento());
+        EsitoSalvataggio esito = vittoria ? salvataggio.salva() : null;
+        mostra(new MenuEsito(testi, vittoria, messaggio, esito, () -> {
+            motore.annullaScenarioSenzaProgressi();
+            mostraGioco(scenario);
+        }, () -> terminaScenario(vittoria, this::mostraMenuScenari),
+                () -> terminaScenario(vittoria, this::mostraMenuPrincipale)));
     }
 
-    // Ricorda la lingua solo dopo un salvataggio riuscito, anche alla vittoria automatica.
-    private String salvaPartitaEPreferenze() {
-        if (!motoreGioco.salva()) {
-            return "salvataggio.fallito";
-        }
-        try {
-            archivioPreferenze.salvaLingua(testi.getLingua());
-            erroreLetturaPreferenze = false;
-            return "salvataggio.riuscito";
-        } catch (IOException exception) {
-            return "preferenze.erroreSalvataggio";
-        }
-    }
-
-    // Crea una schermata con immagine di sfondo e ombra, poi sovrappone il contenuto passato.
-    private StackPane schermataConSfondo(Parent contenuto) {
-        StackPane radice = new StackPane();
-        Image immagine = archivioSprite.iconaSoulSword();
-        ImageView sfondo = new ImageView(immagine);
-        sfondo.setFitWidth(MotoreGioco.larghezzaMondo);
-        sfondo.setFitHeight(MotoreGioco.altezzaMondo);
-        sfondo.setPreserveRatio(false);
-        sfondo.setSmooth(false);
-
-        Rectangle ombra = new Rectangle(MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
-        ombra.setFill(Color.rgb(0, 0, 0, 0.58));
-
-        radice.getChildren().addAll(sfondo, ombra, contenuto);
-        return radice;
-    }
-
-    // Contenitore comune dei menu; lo sfondo resta trasparente per non coprire l'immagine.
-    private VBox pannelloMenu() {
-        VBox pannello = new VBox(18);
-        pannello.setAlignment(Pos.CENTER);
-        pannello.setPadding(new Insets(36));
-        pannello.setMaxWidth(620);
-        pannello.setStyle("-fx-background-color: transparent;");
-        return pannello;
-    }
-
-    // Crea un pulsante coerente con lo stile gotico del menu.
-    private Button bottone(String testo) {
-        Button bottone = new Button(testo);
-        bottone.setMinWidth(250);
-        bottone.setMinHeight(44);
-        bottone.setFont(Font.font("SansSerif", FontWeight.BOLD, 15));
-        bottone.setStyle("-fx-background-color: #0f2230; -fx-text-fill: white;"
-                + " -fx-border-color: #54d7ff; -fx-border-radius: 8; -fx-background-radius: 8;"
-                + " -fx-cursor: hand;");
-        return bottone;
-    }
-
-    private Button bottoneSchermoIntero() {
-        Button bottone = bottone("");
-        bottone.textProperty().bind(Bindings.when(finestra.fullScreenProperty())
-                .then(testi.testo("menu.finestra")).otherwise(testi.testo("menu.schermoIntero")));
-        bottone.setOnAction(ignored -> alternaSchermoIntero());
-        return bottone;
-    }
-
-    private void alternaSchermoIntero() {
-        finestra.setFullScreen(!finestra.isFullScreen());
-    }
-
-    // Pulsante compatto usato per assegnare punti alle statistiche dell'eroe.
-    private Button bottoneStatistica(String testo) {
-        Button bottone = new Button(testo);
-        bottone.setMinWidth(96);
-        bottone.setMinHeight(34);
-        bottone.setFont(Font.font("SansSerif", FontWeight.BOLD, 13));
-        bottone.setStyle("-fx-background-color: #182836; -fx-text-fill: white;"
-                + " -fx-border-color: #8fb7ff; -fx-border-radius: 7; -fx-background-radius: 7;"
-                + " -fx-cursor: hand;");
-        return bottone;
-    }
-
-    // Colore testuale associato all'evoluzione corrente della SoulSword.
-    private Color coloreSoulSword(EvoSoulSword evoluzione) {
-        if (evoluzione == EvoSoulSword.lamaDiSangue) {
-            return Color.rgb(176, 96, 255);
-        }
-        if (evoluzione == EvoSoulSword.mietitriceDellAlba) {
-            return Color.rgb(235, 190, 70);
-        }
-        return Color.WHITE;
-    }
-
-    private Text testo(String contenuto, int dimensione, FontWeight peso) {
-        Text testo = new Text(contenuto);
-        testo.setFill(Color.WHITE);
-        testo.setFont(Font.font("SansSerif", peso, dimensione));
-        return testo;
-    }
-
-    private Scene impostaScena(StackPane radice) {
-        radice.setMinSize(MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
-        radice.setPrefSize(MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
-        radice.setMaxSize(MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
-
-        // Il Group permette di centrare il contenuto usando le dimensioni gia' scalate.
-        StackPane contenitore = new StackPane(new Group(radice));
-        contenitore.setStyle("-fx-background-color: black;");
-        NumberBinding scala = Bindings.min(
-                contenitore.widthProperty().divide(MotoreGioco.larghezzaMondo),
-                contenitore.heightProperty().divide(MotoreGioco.altezzaMondo));
-        radice.scaleXProperty().bind(scala);
-        radice.scaleYProperty().bind(scala);
-
-        Scene scena = finestra.getScene();
-        if (scena == null) {
-            scena = new Scene(contenitore, MotoreGioco.larghezzaMondo, MotoreGioco.altezzaMondo);
-            scena.addEventFilter(KeyEvent.KEY_PRESSED, evento -> {
-                if (evento.getCode() == KeyCode.F11) {
-                    if (!tastoSchermoInteroPremuto) {
-                        tastoSchermoInteroPremuto = true;
-                        alternaSchermoIntero();
-                    }
-                    evento.consume();
-                }
-            });
-            scena.addEventFilter(KeyEvent.KEY_RELEASED, evento -> {
-                if (evento.getCode() == KeyCode.F11) {
-                    tastoSchermoInteroPremuto = false;
-                    evento.consume();
-                }
-            });
-            finestra.setScene(scena);
+    private void terminaScenario(boolean vittoria, Runnable destinazione) {
+        if (vittoria) {
+            motore.confermaVittoriaScenario();
         } else {
-            scena.setOnKeyPressed(null);
-            scena.setOnKeyReleased(null);
-            scena.setRoot(contenitore);
+            motore.annullaScenarioSenzaProgressi();
         }
-        return scena;
+        destinazione.run();
+    }
+
+    private void mostra(Parent menu) {
+        ferma();
+        gestoreFinestra.mostra(ComponentiMenu.conSfondo(menu, immagini));
+    }
+
+    public void ferma() {
+        if (partita != null) {
+            partita.ferma();
+            partita = null;
+        }
     }
 }

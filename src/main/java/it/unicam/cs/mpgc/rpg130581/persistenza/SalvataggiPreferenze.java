@@ -34,9 +34,6 @@ public final class SalvataggiPreferenze implements ArchivioPreferenze {
 
     @Override
     public void salvaLingua(Lingua lingua) throws IOException {
-        if (percorso.getParent() != null) {
-            Files.createDirectories(percorso.getParent());
-        }
-        Files.writeString(percorso, "lingua=" + lingua.getCodice() + "\n", StandardCharsets.UTF_8);
+        ScritturaAtomica.scrivi(percorso, "lingua=" + lingua.getCodice() + "\n");
     }
 }

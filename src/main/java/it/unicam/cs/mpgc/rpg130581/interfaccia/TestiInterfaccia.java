@@ -1,6 +1,8 @@
 package it.unicam.cs.mpgc.rpg130581.interfaccia;
 
 import it.unicam.cs.mpgc.rpg130581.modello.impostazioni.Lingua;
+import it.unicam.cs.mpgc.rpg130581.applicazione.EsitoSalvataggio;
+import it.unicam.cs.mpgc.rpg130581.modello.partita.EventoGioco;
 import it.unicam.cs.mpgc.rpg130581.modello.partita.ScenarioGioco;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.EvoSoulSword;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.TipoVampiro;
@@ -43,11 +45,25 @@ final class TestiInterfaccia {
         return testo("vampiro." + tipo.name());
     }
 
-    String messaggioEsito(boolean vittoria, ScenarioGioco scenario) {
-        if (!vittoria) {
-            return testo("esito.sconfitta");
-        }
-        return scenario.isScenarioBoss() ? testo("esito.vittoriaFinale")
-                : testo("esito.vittoriaScenario", scenario.getNomeVisualizzato());
+    String evento(EventoGioco evento) {
+        Object[] argomenti = evento.dati().stream().map(dato -> {
+            if (dato instanceof TipoVampiro tipo) {
+                return nome(tipo);
+            }
+            if (dato instanceof ScenarioGioco scenario) {
+                return scenario.getNomeVisualizzato();
+            }
+            return dato;
+        }).toArray();
+        return testo("evento." + evento.tipo().name(), argomenti);
     }
+
+    String salvataggio(EsitoSalvataggio esito) {
+        return testo(switch (esito) {
+            case riuscito -> "salvataggio.riuscito";
+            case partitaFallita -> "salvataggio.fallito";
+            case preferenzeFallite -> "preferenze.erroreSalvataggio";
+        });
+    }
+
 }

@@ -1,0 +1,56 @@
+.viewport { -fx-background-color: black; }
+.testo-menu { -fx-fill: white; -fx-font-family: "SansSerif"; -fx-font-size: 18px; }
+.titolo-principale { -fx-font-size: 58px; -fx-font-weight: 800; -fx-fill: #d2eeff; }
+.titolo-scenari { -fx-font-size: 36px; -fx-font-weight: 800; }
+.titolo-pausa { -fx-font-size: 48px; -fx-font-weight: 800; -fx-fill: #d2eeff; }
+.titolo-esito { -fx-font-size: 56px; -fx-font-weight: 800; }
+.vittoria { -fx-fill: #50dcff; }
+.sconfitta { -fx-fill: #ff4652; }
+.nota-menu { -fx-font-size: 15px; }
+.testo-dettaglio { -fx-font-size: 14px; }
+.testo-stats { -fx-font-size: 15px; -fx-font-weight: bold; }
+.nome-eroe { -fx-font-weight: bold; -fx-fill: #50aaff; }
+.testo-eroe { -fx-font-weight: bold; }
+.evoluzione-risvegliata { -fx-fill: white; }
+.evoluzione-lamaDiSangue { -fx-fill: #b060ff; }
+.evoluzione-mietitriceDellAlba { -fx-fill: #ebbe46; }
+.pannello-menu { -fx-spacing: 18; -fx-padding: 36; -fx-max-width: 620; }
+.ombra-sfondo { -fx-fill: rgba(0, 0, 0, 0.58); }
+.ombra-pausa { -fx-fill: rgba(0, 0, 0, 0.62); }
+.bottone-menu {
+    -fx-min-width: 250;
+    -fx-min-height: 44;
+    -fx-font-family: "SansSerif";
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-background-color: #0f2230;
+    -fx-text-fill: white;
+    -fx-border-color: #54d7ff;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+.bottone-statistica {
+    -fx-min-width: 96;
+    -fx-min-height: 34;
+    -fx-font-size: 13px;
+    -fx-background-color: #182836;
+    -fx-border-color: #8fb7ff;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+}
+.menu-scenari { -fx-spacing: 26; -fx-padding: 32; }
+.scheda-eroe {
+    -fx-spacing: 12;
+    -fx-padding: 28;
+    -fx-min-width: 280;
+    -fx-background-color: rgba(8, 10, 16, 0.82);
+    -fx-background-radius: 14;
+}
+.scheda-scenari {
+    -fx-spacing: 16;
+    -fx-padding: 28;
+    -fx-background-color: rgba(8, 10, 16, 0.72);
+    -fx-background-radius: 14;
+}
+.elenco-scenari { -fx-spacing: 10; }

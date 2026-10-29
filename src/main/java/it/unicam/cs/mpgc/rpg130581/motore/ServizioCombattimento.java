@@ -1,27 +1,30 @@
 package it.unicam.cs.mpgc.rpg130581.motore;
 
 import it.unicam.cs.mpgc.rpg130581.modello.combattimento.EsitoCombattimento;
+import it.unicam.cs.mpgc.rpg130581.modello.partita.EventoGioco;
+import it.unicam.cs.mpgc.rpg130581.modello.partita.TipoEventoGioco;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.Eroe;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.TipoVampiro;
 import it.unicam.cs.mpgc.rpg130581.modello.personaggi.Vampiro;
 
-import java.util.Random;
+import java.util.Objects;
+import java.util.random.RandomGenerator;
 
 /**
  * Servizio che risolve uno scambio di combattimento tra eroe e vampiro.
  * Restituisce un esito senza occuparsi direttamente della grafica o degli scenari.
  */
-public class ServizioCombattimento {
+public class ServizioCombattimento implements Combattimento {
 
-    private final Random random;
+    private final RandomGenerator random;
 
     /**
      * Crea il servizio di combattimento.
      *
      * @param random generatore casuale usato per variare i danni
      */
-    public ServizioCombattimento(Random random) {
-        this.random = random;
+    public ServizioCombattimento(RandomGenerator random) {
+        this.random = Objects.requireNonNull(random);
     }
 
     /**
@@ -39,10 +42,9 @@ public class ServizioCombattimento {
         if (vampiro.isSconfitto()) {
             eroe.guadagnaEsperienza(vampiro.getRicompensaEsperienza());
             eroe.registraVittoria();
-            String messaggio = vampiro.getTipo() == TipoVampiro.arciduca
-                    ? "L'Arciduca Vampiro e' caduto. L'alba torna sul mondo."
-                    : "Vampiro sconfitto. La SoulSword assorbe nuova energia.";
-            return new EsitoCombattimento(0, true, false, messaggio);
+            TipoEventoGioco tipo = vampiro.getTipo() == TipoVampiro.arciduca
+                    ? TipoEventoGioco.bossSconfitto : TipoEventoGioco.vampiroSconfitto;
+            return new EsitoCombattimento(0, true, false, EventoGioco.di(tipo));
         }
 
         int dannoVampiro = Math.max(1,
@@ -50,9 +52,8 @@ public class ServizioCombattimento {
         eroe.subisciDanno(dannoVampiro);
         boolean eroeSconfitto = eroe.isSconfitto();
 
-        String messaggio = eroeSconfitto
-                ? "Sei stato sconfitto dai vampiri."
-                : "Colpo scambiato.";
-        return new EsitoCombattimento(dannoVampiro, false, eroeSconfitto, messaggio);
+        TipoEventoGioco tipo = eroeSconfitto
+                ? TipoEventoGioco.eroeSconfitto : TipoEventoGioco.colpoScambiato;
+        return new EsitoCombattimento(dannoVampiro, false, eroeSconfitto, EventoGioco.di(tipo));
     }
 }
